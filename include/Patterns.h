@@ -18,7 +18,7 @@ CRGBArray<NUM_LEDS> leds;
 
 #define BASS_THRESHOLD 10
 
-int levelMax[] = { 0, 0, 0, 0, 0, 0, 0, 0 };
+// int levelMax[] = { 0, 0, 0, 0, 0, 0, 0, 0 };
 int startHues[8] = {0, 30, 60, 90, 120, 150, 180, 210};
 int hueOffset = 0;
 
@@ -30,19 +30,6 @@ void init_leds(){
 // move to util lib
 void increaseHue(int amount) {
   hueOffset = (hueOffset + amount) % 255;
-}
-
-// just flashes all the lights white so I know it booted up.
-void startupTest() {
-  for (int i = 3; i < NUM_LEDS; i++) {
-    FastLED.clear();
-    leds[i] = CHSV(1, 0, 200);
-    leds[i - 1] = CHSV(1, 0, 150);
-    leds[i - 2] = CHSV(1, 0, 100);
-    leds[i - 3] = CHSV(1, 0, 50);
-    FastLED.show();
-    delay(15);
-  }
 }
 
 // todo: move to util lib
@@ -59,7 +46,17 @@ bool changeHueOnBass(float levels[]) {
 
 void fadeAllLeds(){
   for (int i = 0; i < NUM_LEDS; i++){
-    leds[i].fadeToBlackBy(10);
+    leds[i].fadeToBlackBy(90);
+  }
+}
+
+// just flashes all the lights white so I know it booted up.
+void startupTest() {
+  for (int i = 0; i < NUM_LEDS; i++) {
+    fadeAllLeds();
+    leds[i] = CHSV(1, 0, 200);
+    FastLED.show();
+    delay(15);
   }
 }
 
@@ -75,17 +72,9 @@ void patternOne(float levels[]) {
     leds[hexes[6 - i].spiral[0]] = CHSV(hue, 255, 120); // keep the center lit, always
     int band_value = int(levels[i]);
 
-    for (int j = 0; (j < band_value && j < 19) || j * DECAYSPEED < levelMax[i]; j++) {
-      if ( j * DECAYSPEED > levelMax[i] ) {
-        levelMax[i] = j * DECAYSPEED;
-      }
+    for (int j = 0; (j < band_value && j < 19); j++) {
       leds[hexes[6 - i].spiral[j]] = CHSV(hue, 255, 120);
     }
-
-    if ( levelMax[i] > 6 ) { // why did I do this? why is it 6?
-      leds[hexes[6 - i].spiral[int(levelMax[i] / DECAYSPEED)]] = CHSV(hue, 255, 180);
-    }
-    levelMax[i]--;
   }
 }
 
@@ -100,18 +89,11 @@ void patternThree(float levels[]) {
   //  changeHueOnBass(levels);
 
   for (int i = 0; i < 8; i++) {
-    levelMax[i]--;
-    if (levelMax[i] < 0) levelMax[i] = 0;
     int hue = (i * (255 / 8) + hueOffset);
     int band_value = int(levels[i]);
 
     if ( band_value > 5) {
-      levelMax[i] = 14;
       setRingColor(leds, i, CHSV(hue, 255, BRIGHTNESS) );
-    }
-    else {
-      if (levelMax[i] > 0 && levelMax[i] <= 10) setRingColor(leds, i, CHSV(hue, 255, BRIGHTNESS) );
-      if (levelMax[i] <= 8) setRingColor(leds, i, CHSV(hue, 255, BRIGHTNESS / 14 * levelMax[i]) );
     }
   }
 }
@@ -160,19 +142,13 @@ void patternSix(float levels[]) {
     //    leds[hexes[6 - i].spiral[0]] = CHSV(hue, 255, 120); // keep the center lit, always
     int band_value = int(levels[i]);
 
-    for (int j = 0; (j < band_value && j < 19) || j * DECAYSPEED < levelMax[i]; j++) {
-      if ( j * DECAYSPEED > levelMax[i] ) {
-        levelMax[i] = j * DECAYSPEED;
-      }
+    for (int j = 0; (j < band_value && j < 19); j++) {
       leds[hexes[6 - i].spiral[18 - j]] = CHSV(hue, 255, 120);
     }
 
-    if ( levelMax[i] > 6 ) { // why did I do this? why is it 6?
-      leds[hexes[6 - i].spiral[18 - int(levelMax[i] / DECAYSPEED)]] = CHSV(hue, 255, 180);
-    }
-    levelMax[i]--;
   }
 }
+
 
 // each hex is a band, and lights their rows outward
 // but the center hex does its own thing
@@ -182,34 +158,14 @@ void patternSeven(float levels[]) {
   for (int i = 0; i < 6; i++) { // skip the center hex for now
     int band_value = int(levels[i]);
 
-
-    if ( band_value * DECAYSPEED > levelMax[i] ) {
-      levelMax[i] = band_value * DECAYSPEED;
-    }
-    // fade all the rings first, and then overwrite them with brighter colors if you need to
-    // does this make sense?
-    if ( levelMax[i]*DECAYSPEED > 2) for (int j = 0; j < 3; j++) leds[hexes[i].ring4[j]] = CHSV(85, 255, BRIGHTNESS / 18 * levelMax[i]);
-    if ( levelMax[i]*DECAYSPEED > 3) for (int j = 0; j < 4; j++) leds[hexes[i].ring7[j]] = CHSV(85, 255, BRIGHTNESS / 18 * levelMax[i]);
-    if ( levelMax[i]*DECAYSPEED > 5) for (int j = 0; j < 5; j++) leds[hexes[i].ring6[j]] = CHSV(48, 255, BRIGHTNESS / 18 * levelMax[i]);
-    if ( levelMax[i]*DECAYSPEED > 8) for (int j = 0; j < 4; j++) leds[hexes[i].ring5[j]] = CHSV(48, 255, BRIGHTNESS / 18 * levelMax[i]);
-    if ( levelMax[i]*DECAYSPEED > 10) for (int j = 0; j < 3; j++) leds[hexes[i].ring8[j]] = CHSV(0, 255, BRIGHTNESS / 18 * levelMax[i]);
-
     if ( band_value > 2) for (int j = 0; j < 3; j++) leds[hexes[i].ring4[j]] = CHSV(85, 255, BRIGHTNESS);
     if ( band_value > 3) for (int j = 0; j < 4; j++) leds[hexes[i].ring7[j]] = CHSV(85, 255, BRIGHTNESS);
     if ( band_value > 5) for (int j = 0; j < 5; j++) leds[hexes[i].ring6[j]] = CHSV(48, 255, BRIGHTNESS);
     if ( band_value > 8) for (int j = 0; j < 4; j++) leds[hexes[i].ring5[j]] = CHSV(48, 255, BRIGHTNESS);
     if ( band_value > 10) for (int j = 0; j < 3; j++) leds[hexes[i].ring8[j]] = CHSV(0, 255, BRIGHTNESS);
-    levelMax[i]--;
   }
   // center hex
   int band_value = int(levels[0]);
-  if ( band_value * DECAYSPEED > levelMax[0] ) {
-    levelMax[0] = band_value * DECAYSPEED;
-  }
-  if ( levelMax[0] > 2) for (int j = 0; j < INNERLEN; j++) leds[hexes[6].center[j]] = CHSV(85, 255, BRIGHTNESS / 18 * levelMax[0]);
-  if ( levelMax[0] > 5) for (int j = 0; j < MIDDLELEN; j++) leds[hexes[6].middle[j]] = CHSV(85, 255, BRIGHTNESS / 18 * levelMax[0]);
-  if ( levelMax[0] > 10) for (int j = 0; j < OUTERLEN; j++) leds[hexes[6].outer[j]] = CHSV(85, 255, BRIGHTNESS / 18 * levelMax[0]);
-  
   if ( band_value > 2) for (int j = 0; j < INNERLEN; j++) leds[hexes[6].center[j]] = CHSV(85, 255, BRIGHTNESS);
   if ( band_value > 5) for (int j = 0; j < MIDDLELEN; j++) leds[hexes[6].middle[j]] = CHSV(85, 255, BRIGHTNESS);
   if ( band_value > 10) for (int j = 0; j < OUTERLEN; j++) leds[hexes[6].outer[j]] = CHSV(85, 255, BRIGHTNESS);
@@ -221,34 +177,16 @@ void patternEight(float levels[]) {
   for (int i = 0; i < 6; i++) { // skip the center hex for now
     int band_value = int(levels[i]);
 
-
-    if ( band_value * DECAYSPEED > levelMax[i] ) {
-      levelMax[i] = band_value * DECAYSPEED;
-    }
-    // fade all the rings first, and then overwrite them with brighter colors if you need to
-    // does this make sense?
-    if ( levelMax[i]*DECAYSPEED > 2) for (int j = 0; j < 3; j++) leds[hexes[i].ring8[j]] = CHSV(85, 255, BRIGHTNESS / 18 * levelMax[i]);
-    if ( levelMax[i]*DECAYSPEED > 3) for (int j = 0; j < 4; j++) leds[hexes[i].ring5[j]] = CHSV(85, 255, BRIGHTNESS / 18 * levelMax[i]);
-    if ( levelMax[i]*DECAYSPEED > 5) for (int j = 0; j < 5; j++) leds[hexes[i].ring6[j]] = CHSV(48, 255, BRIGHTNESS / 18 * levelMax[i]);
-    if ( levelMax[i]*DECAYSPEED > 8) for (int j = 0; j < 4; j++) leds[hexes[i].ring7[j]] = CHSV(48, 255, BRIGHTNESS / 18 * levelMax[i]);
-    if ( levelMax[i]*DECAYSPEED > 10) for (int j = 0; j < 3; j++) leds[hexes[i].ring4[j]] = CHSV(0, 255, BRIGHTNESS / 18 * levelMax[i]);
-
     if ( band_value > 2) for (int j = 0; j < 3; j++) leds[hexes[i].ring8[j]] = CHSV(85, 255, BRIGHTNESS);
     if ( band_value > 3) for (int j = 0; j < 4; j++) leds[hexes[i].ring5[j]] = CHSV(85, 255, BRIGHTNESS);
     if ( band_value > 5) for (int j = 0; j < 5; j++) leds[hexes[i].ring6[j]] = CHSV(48, 255, BRIGHTNESS);
     if ( band_value > 8) for (int j = 0; j < 4; j++) leds[hexes[i].ring7[j]] = CHSV(48, 255, BRIGHTNESS);
     if ( band_value > 10) for (int j = 0; j < 3; j++) leds[hexes[i].ring4[j]] = CHSV(0, 255, BRIGHTNESS);
-    levelMax[i]--;
+
   }
   // center hex
   int band_value = int(levels[0]);
-  if ( band_value * DECAYSPEED > levelMax[0] ) {
-    levelMax[0] = band_value * DECAYSPEED;
-  }
-  if ( levelMax[0] > 2) for (int j = 0; j < INNERLEN; j++) leds[hexes[6].center[j]] = CHSV(85, 0, BRIGHTNESS / 18 * levelMax[0]);
-  if ( levelMax[0] > 5) for (int j = 0; j < MIDDLELEN; j++) leds[hexes[6].middle[j]] = CHSV(85, 0, BRIGHTNESS / 18 * levelMax[0]);
-  if ( levelMax[0] > 10) for (int j = 0; j < OUTERLEN; j++) leds[hexes[6].outer[j]] = CHSV(85, 0, BRIGHTNESS / 18 * levelMax[0]);
-  
+
   if ( band_value > 2) for (int j = 0; j < INNERLEN; j++) leds[hexes[6].center[j]] = CHSV(85, 0, BRIGHTNESS);
   if ( band_value > 5) for (int j = 0; j < MIDDLELEN; j++) leds[hexes[6].middle[j]] = CHSV(85, 0, BRIGHTNESS);
   if ( band_value > 10) for (int j = 0; j < OUTERLEN; j++) leds[hexes[6].outer[j]] = CHSV(85, 0, BRIGHTNESS);
