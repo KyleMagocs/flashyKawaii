@@ -29,7 +29,7 @@ PatternFunction allPatterns[] = {
     patternFive,
     patternSix,
     patternSeven,
-    patternEight
+    patternEight,
     patternNine};
 
 #define NUMIDLEPATTERNS 10
