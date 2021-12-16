@@ -25,19 +25,36 @@ void logLevels(float levels[8]) {
   Serial.println("");
 }
 
+// float * LoadLevels(float levels[8]) {
+//   // read the 256 FFT frequencies into 16 levels
+//   // music is heard in octaves, but the FFT data
+//   // is linear, so for the higher octaves, read
+//   // many FFT bins together.
+//   levels[0] = fft256_1.read(0) * 20;
+//   levels[1] = fft256_1.read(1) * 20;
+//   levels[2] = fft256_1.read(2) * 20;
+//   levels[3] = fft256_1.read(3, 5) * 20;
+//   levels[4] = fft256_1.read(6, 30) * 25;
+//   levels[5] = fft256_1.read(31, 60) * 20;
+//   levels[6] = fft256_1.read(61, 70) * 40;
+//   levels[7] = fft256_1.read(71, 255) * 20;
+//   logLevels(levels);
+//   return levels;
+// }
+
 float * LoadLevels(float levels[8]) {
   // read the 256 FFT frequencies into 16 levels
   // music is heard in octaves, but the FFT data
   // is linear, so for the higher octaves, read
   // many FFT bins together.
-  levels[0] = fft256_1.read(0) * 20;
-  levels[1] = fft256_1.read(1) * 20;
-  levels[2] = fft256_1.read(2) * 20;
-  levels[3] = fft256_1.read(3, 5) * 20;
-  levels[4] = fft256_1.read(6, 30) * 25;
-  levels[5] = fft256_1.read(31, 60) * 20;
-  levels[6] = fft256_1.read(61, 70) * 40;
-  levels[7] = fft256_1.read(71, 255) * 20;
+  levels[0] = fft256_1.read(0,0) * 20;
+  levels[1] = fft256_1.read(1,2) * 20;
+  levels[2] = fft256_1.read(3,5) * 20;
+  levels[3] = fft256_1.read(6, 13) * 20;
+  levels[4] = fft256_1.read(14, 30) * 20;
+  levels[5] = fft256_1.read(31, 61) * 20;
+  levels[6] = fft256_1.read(62, 125) * 20;
+  levels[7] = fft256_1.read(126, 254) * 20;
   logLevels(levels);
   return levels;
 }
