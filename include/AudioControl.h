@@ -66,8 +66,8 @@ float * LoadLevels1024(float levels[8]) {
   // music is heard in octaves, but the FFT data
   // is linear, so for the higher octaves, read
   // many FFT bins together.
-  levels[0] = fft256_1.read(0, 1   ) * 20;
-  levels[1] = fft256_1.read(2, 3   ) * 20;
+  levels[0] = fft256_1.read(0, 0   ) * 20;
+  levels[1] = fft256_1.read(1, 3   ) * 20;
   levels[2] = fft256_1.read(4, 11  ) * 20;
   levels[3] = fft256_1.read(12, 30) * 20;
   levels[4] = fft256_1.read(31, 74) * 20;

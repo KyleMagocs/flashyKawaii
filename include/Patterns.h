@@ -69,7 +69,7 @@ void increaseWheel(int amount)
   wheelIndex = (wheelIndex + amount) % 255;
 }
 
-#define BASS_THRESHOLD 20
+#define BASS_THRESHOLD 15
 int basscounter = 0; // we don't want to change every dang millisecond, yknow?
 bool bassHit(float levels[])
 {
@@ -184,7 +184,11 @@ void patternThree(float levels[])
   {
     int hue = (i * (255 / 8) + hueOffset);
     int band_value = int(levels[i]);
-
+    if (i == 4) { i = 6;}  // I did this by mistake early on and it turns out it makes it way better
+    else if (i == 6) {i = 4;}
+    else if (i == 2) {i = 0;}
+    else if (i == 0) {i = 2;}
+    
     if (band_value > 5)
     {
       setRingColor(leds, i, CHSV(hue, 255, BRIGHTNESS));
@@ -213,7 +217,7 @@ void patternFour(float levels[])
   }
 }
 
-// each hex BUMPS and changes color on bass
+// each hex BUMPS
 void patternFive(float levels[])
 {
   bassHit(levels);
@@ -223,12 +227,21 @@ void patternFive(float levels[])
     int hue = (i * 20 + hueOffset);
     int band_value = levels[i];
 
-    for (int j = 0; j < 19; j++)
-    {
-      leds[hexes[6 - i].spiral[j]] = CHSV(hue, 255, 50);                                       // ensure a minimum brightness
-      leds[hexes[6 - i].spiral[j]] = CHSV(hue, 255, min(max(50, band_value * 8), BRIGHTNESS)); // this is ugly and I am dumb
-    }
+    if (band_value > 2)
+      for (int j = 0; j < INNERLEN; j++)
+        leds[hexes[6 - i].center[j]] = CHSV(hue, 255, BRIGHTNESS);
+    if (band_value > 5)
+      for (int j = 0; j < MIDDLELEN; j++)
+        leds[hexes[6 - i].middle[j]] = CHSV(hue, 255, BRIGHTNESS);
+    if (band_value > 10)
+      for (int j = 0; j < OUTERLEN; j++)
+        leds[hexes[6 - i].outer[j]] = CHSV(hue, 255, BRIGHTNESS);
   }
+
+    // for (int j = 0; j < 19; j++)
+    // {
+    //   leds[hexes[6 - i].spiral[j]] = CHSV(hue, 255, min(band_value * 8, BRIGHTNESS)); // this is ugly and I am dumb
+    // }
 }
 
 // each hex is a band, and spirals inward
@@ -473,12 +486,12 @@ void IdlePatternSix()
 //each hex spirals out, and then spirals off out
 void IdlePatternFive()
 {
+  spiralIndex %= 19;
   for (int j = 0; j < NUMHEXES; j++)
   {
     leds[hexes[j].spiral[spiralIndex++]] = CHSV(255 / 7 * j + hueOffset, 200, 100);
   }
 
-  spiralIndex %= 19;
   increaseHue(5);
 }
 #pragma endregion

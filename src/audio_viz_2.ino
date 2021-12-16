@@ -32,14 +32,14 @@ PatternFunction allPatterns[] = {
     patternEight,
     patternNine};
 
-#define NUMIDLEPATTERNS 10
+#define NUMIDLEPATTERNS 9
 typedef void (*IdleFunction)();
 IdleFunction idlePatterns[] = {
     IdlePatternOne_better,
     IdlePatternTwo,
     IdlePatternThree,
     IdlePatternFour_fullsend,
-    IdlePatternFive,
+    // IdlePatternFive,  // started crashing and I don't like it enough to care
     pacifica_loop,
     Fire2012WithPalette,
     FireCool,
@@ -116,10 +116,8 @@ void loop()
       fadeAllLeds();
       float levels[8];
       LoadLevels1024(levels);
-
       if (patternSwitch / 1000 > PATTERN_TIMER)
       {
-        FastLED.clear();
         idleIndex = random(NUMIDLEPATTERNS);
         patternIndex = random(NUMPATTERNS);
         Serial.print("New pattern: ");
@@ -136,6 +134,7 @@ void loop()
       }
       if (idleTimer / 1000 > 30)
       {
+       patternSwitch = patternSwitch - 10; // slow down a bit if we're in idle mode
        idlePatterns[idleIndex]();
       }
       else
