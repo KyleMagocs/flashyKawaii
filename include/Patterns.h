@@ -280,6 +280,23 @@ void IdlePatternOne()
   increaseHue(36);
 }
 
+//each hex spirals out.
+int spiralIndex = 0;
+void IdlePatternOne_better()
+{
+  int saturation = 8*spiralIndex;
+    for (int j = 0; j < NUMHEXES; j++)
+    {
+      leds[hexes[j].spiral[0]] = CHSV(255 / 7 * j + hueOffset, saturation, 100);
+      leds[hexes[j].spiral[spiralIndex]] = CHSV(255 / 7 * j + hueOffset, saturation, 100);
+    }
+    delay(100);
+
+  increaseHue(5);
+  spiralIndex++;
+  spiralIndex %= 19;
+}
+
 // rainbow shifting across rings
 void IdlePatternTwo()
 {
@@ -305,17 +322,17 @@ void IdlePatternThree()
   {
     for (int i = 0; i < NUMHEXES; i++)
     {
-      leds[hexes[i].middle[j]] = CHSV(85 + 255 / 9 * i + hueOffset, 255, 100);
+      leds[hexes[i].middle[j]] = CHSV(20 + 255 / 9 * i + hueOffset, 255, 100);
     }
   }
   for (int j = 0; j < OUTERLEN; j++)
   {
     for (int i = 0; i < NUMHEXES; i++)
     {
-      leds[hexes[i].outer[j]] = CHSV(170 + 255 / 9 * i + hueOffset, 255, 100);
+      leds[hexes[i].outer[j]] = CHSV(40 + 255 / 9 * i + hueOffset, 255, 100);
     }
   }
-  increaseHue(3);
+  increaseHue(1);
 }
 
 // sets the outline of the board and the inner hex to shifting colors.
@@ -333,12 +350,10 @@ void IdlePatternFour()
   increaseHue(3);
 }
 
+
 //each hex spirals out, and then spirals off out
-int spiralIndex = 0;
 void IdlePatternFive()
 {
-  int saturation = 0;
-
   for (int j = 0; j < NUMHEXES; j++)
   {
     leds[hexes[j].spiral[spiralIndex++]] = CHSV(255 / 7 * j + hueOffset, 200, 100);

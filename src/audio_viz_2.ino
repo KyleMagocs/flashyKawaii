@@ -34,7 +34,7 @@ PatternFunction allPatterns[] = {
 #define NUMIDLEPATTERNS 9
 typedef void (*IdleFunction)();
 IdleFunction idlePatterns[] = {
-    IdlePatternOne,
+    IdlePatternOne_better,
     IdlePatternTwo,
     IdlePatternThree,
     IdlePatternFour,
