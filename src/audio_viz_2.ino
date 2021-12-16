@@ -19,7 +19,7 @@
 #define PATTERN_TIMER 30
 #define FPS 15
 
-#define NUMPATTERNS 6
+#define NUMPATTERNS 7
 typedef void (*PatternFunction)(float levels[]);
 PatternFunction allPatterns[] = {
     // patternOne,
@@ -29,9 +29,10 @@ PatternFunction allPatterns[] = {
     patternFive,
     patternSix,
     patternSeven,
-    patternEight};
+    patternEight
+    patternNine};
 
-#define NUMIDLEPATTERNS 9
+#define NUMIDLEPATTERNS 10
 typedef void (*IdleFunction)();
 IdleFunction idlePatterns[] = {
     IdlePatternOne_better,
@@ -41,6 +42,7 @@ IdleFunction idlePatterns[] = {
     IdlePatternFive,
     pacifica_loop,
     Fire2012WithPalette,
+    FireCool,
     TestPatternFour,
     TestPatternThree};
 
@@ -59,6 +61,18 @@ void printBands()
       Serial.printf("%1d %1d\n", from, to - 2); // maual tweaking off the beaten path woo
     else
       Serial.printf("%1d %1d\n", from - 1, to - 2);
+    // Serial.printf("To   = %1d\n", to-1);
+  }
+  Serial.println("OR!!!");
+  bins=1024;
+  for (int b = 0; b < bands; b++)
+  {
+    int from = int(exp(log(bins) * b / bands));
+    int to = int(exp(log(bins) * (b + 1) / bands));
+    if (from == 0)
+      Serial.printf("%1d, %1d\n", from, to - 2); // maual tweaking off the beaten path woo
+    else
+      Serial.printf("%1d, %1d\n", from - 1, to - 2);
     // Serial.printf("To   = %1d\n", to-1);
   }
 }
@@ -101,7 +115,7 @@ void loop()
     {
       fadeAllLeds();
       float levels[8];
-      LoadLevels(levels);
+      LoadLevels1024(levels);
 
       if (patternSwitch / 1000 > PATTERN_TIMER)
       {
@@ -122,7 +136,7 @@ void loop()
       }
       if (idleTimer / 1000 > 30)
       {
-        idlePatterns[idleIndex]();
+       idlePatterns[idleIndex]();
       }
       else
       {
