@@ -35,11 +35,11 @@ PatternFunction allPatterns[] = {
 #define NUMIDLEPATTERNS 9
 typedef void (*IdleFunction)();
 IdleFunction idlePatterns[] = {
-    IdlePatternOne_better,
+    // IdlePatternOne_better,  // started crashing and I don't like it enough to care
     IdlePatternTwo,
     IdlePatternThree,
     IdlePatternFour_fullsend,
-    // IdlePatternFive,  // started crashing and I don't like it enough to care
+    IdlePatternFive,
     pacifica_loop,
     Fire2012WithPalette,
     FireCool,
@@ -64,7 +64,7 @@ void printBands()
     // Serial.printf("To   = %1d\n", to-1);
   }
   Serial.println("OR!!!");
-  bins=1024;
+  bins = 1024;
   for (int b = 0; b < bands; b++)
   {
     int from = int(exp(log(bins) * b / bands));
@@ -81,14 +81,12 @@ void setup()
 {
   delay(1000);
   Serial.begin(9600);
-  printBands();
+  // printBands();
   randomSeed(analogRead(0));
   patternIndex = random(NUMPATTERNS);
   idleIndex = random(NUMIDLEPATTERNS);
-  Serial.print("New pattern: ");
-  Serial.println(patternIndex + 1);
-  Serial.print("New idle pattern: ");
-  Serial.println(idleIndex + 1);
+  Serial.printf("pattern:%d ", patternIndex);
+  Serial.printf("idle:%d ", idleIndex);
 
   init_leds();
   startupTest();
@@ -109,10 +107,19 @@ void loop()
 {
   if (drawTimer > 1000 / FPS)
   {
-    drawTimer = 0;
-
+    beatDetectionLoop();
     if (fft256_1.available())
     {
+
+      // if (patternSwitch / 1000 % 1 == 0){
+      //   Serial.printf("beat:%d ", getLowBeat());
+      //   Serial.printf("virtual:%d ", getVirtualBeat());
+      //   Serial.printf("bpm:%d ", getBpmBeat());
+      //   Serial.printf("pattern:%d ", patternIndex);
+      //   Serial.printf("idle:%d ", idleIndex);
+      // }
+
+      drawTimer = 0;
       fadeAllLeds();
       float levels[8];
       LoadLevels1024(levels);
@@ -120,10 +127,6 @@ void loop()
       {
         idleIndex = random(NUMIDLEPATTERNS);
         patternIndex = random(NUMPATTERNS);
-        Serial.print("New pattern: ");
-        Serial.println(patternIndex + 1);
-        Serial.print("New idle pattern: ");
-        Serial.println(idleIndex + 1);
         patternSwitch = 0;
         increaseHue(random(128)); // why not?
       }
@@ -134,14 +137,16 @@ void loop()
       }
       if (idleTimer / 1000 > 30)
       {
-       patternSwitch = patternSwitch - 10; // slow down a bit if we're in idle mode
-       idlePatterns[idleIndex]();
+        patternSwitch = patternSwitch - 10; // slow down a bit if we're in idle mode
+        idlePatterns[idleIndex]();
       }
       else
       {
+        // patternNine(levels);
         allPatterns[patternIndex](levels);
       }
       FastLED.show();
+      // Serial.println();
     }
     else
     {

@@ -4,6 +4,8 @@
 #include <SerialFlash.h>
 #include <WS2812Serial.h>
 #include "Hex.h"
+#include "Palette.h"
+#include "AudioControl.h"
 #define USE_WS2812SERIAL // the teensy 4 haaaaates you if you don't do this
 #define FASTLED_INTERNAL
 
@@ -18,38 +20,6 @@ CRGBArray<NUM_LEDS> leds;
 // int levelMax[] = { 0, 0, 0, 0, 0, 0, 0, 0 };
 int startHues[8] = {0, 30, 60, 90, 120, 150, 180, 210};
 int hueOffset = 0;
-
-#pragma region palettes
-CRGB purple = CHSV(HUE_PURPLE, 255, 255);
-CRGB green = CHSV(HUE_GREEN, 255, 255);
-CRGB black = CRGB::Black;
-CRGB white = CRGB::White;
-
-CRGBPalette16 GreenAndPurple_p = CRGBPalette16(
-    green, green, black, black,
-    purple, purple, black, black,
-    green, green, black, black,
-    purple, purple, black, black);
-
-CRGBPalette16 WhiteStripes_p = CRGBPalette16(
-    CRGB::Red, black, black, black,
-    CRGB::Blue, black, black, black,
-    CRGB::Green, black, black, black,
-    CRGB::Blue, black, black, black);
-
-// Gradient palette "bhw2_50_gp", originally from
-// http://soliton.vm.bytemark.co.uk/pub/cpt-city/bhw/bhw2/tn/bhw2_50.png.index.html
-// converted for FastLED with gammas (2.6, 2.2, 2.5)
-// Size: 20 bytes of program space.
-
-DEFINE_GRADIENT_PALETTE( bhw2_50_gp ) {
-    0,   8,  2, 23,
-   84,  47,  7,102,
-  138,  16, 46,147,
-  173,   2,127,203,
-  255,   1,  7, 11};
-
-#pragma endregion
 
 #pragma region UTILS
 void init_leds()
@@ -73,19 +43,20 @@ void increaseWheel(int amount)
 int basscounter = 0; // we don't want to change every dang millisecond, yknow?
 bool bassHit(float levels[])
 {
-  basscounter++;
-  if (levels[0] > BASS_THRESHOLD)
-  {
-    // Serial.printf("Bass Counter: %d\n", huechangecounter);
-    if (basscounter > 2)
-    { // yes, this could have been a &&, but separating the ifs helps debug
-      basscounter = 0;
-      Serial.println(levels[0]);
-      // increaseHue(20);
-      return true;
-    }
-  }
-  return false;
+  return getLowBeat();
+  // basscounter++;
+  // if (levels[0] > BASS_THRESHOLD)
+  // {
+  //   // Serial.printf("Bass Counter: %d\n", huechangecounter);
+  //   if (basscounter > 2)
+  //   { // yes, this could have been a &&, but separating the ifs helps debug
+  //     basscounter = 0;
+  //     Serial.println(levels[0]);
+  //     // increaseHue(20);
+  //     return true;
+  //   }
+  // }
+  // return false;
 }
 
 void fadeAllLeds()
@@ -356,7 +327,7 @@ void patternNine(float levels[])
     for (int i = 0; i < 20; i++)
     {
       increaseWheel(1);
-      drawWheelWithPalette(BRIGHTNESS, bhw2_50_gp);
+      drawWheelWithPalette(BRIGHTNESS, GreenAndPurple_p);
       FastLED.show();
       delay(.2);
     }
@@ -364,7 +335,7 @@ void patternNine(float levels[])
   else
   {
     increaseWheel(.5);
-    drawWheelWithPalette(BRIGHTNESS, bhw2_50_gp);
+    drawWheelWithPalette(BRIGHTNESS, GreenAndPurple_p);
   }
 }
 #pragma endregion

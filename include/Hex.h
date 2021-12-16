@@ -36,7 +36,7 @@ Hex::Hex(int index)
 {
   _index = index;
   int mod = index * 19;
-  Serial.printf("initializing hex %d\n", index);
+  // Serial.printf("initializing hex %d\n", index);
   // to ease programming, a pixel was skipped in the wiring, so we gotta do this.
   // or I guess I could have cut the wire and soldered a tiny extension in?
   // but fixing it in code is way easier
@@ -215,7 +215,7 @@ void initSpiralandRings()
 
 void init_hexes()
 {
-  Serial.println("Initializing hexes now");
+  // Serial.println("Initializing hexes now");
   // bespoke ordering, why not.
   hexes[6] = Hex(6);
   hexes[5] = Hex(0);
@@ -228,11 +228,11 @@ void init_hexes()
     orderedHexes[i] = Hex(i);
   }
 
-  Serial.println("hexes done");
+  // Serial.println("hexes done");
   initOutline();
-  Serial.println("outline done");
+  // Serial.println("outline done");
   initSpiralandRings();
-  Serial.println("spirals and rings done");
+  // Serial.println("spirals and rings done");
 }
 
 void setRingColor(CRGBArray<NUM_LEDS> &leds, int ring, CHSV color)
