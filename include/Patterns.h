@@ -284,17 +284,17 @@ void IdlePatternOne()
 int spiralIndex = 0;
 void IdlePatternOne_better()
 {
-  int saturation = 8*spiralIndex;
-    for (int j = 0; j < NUMHEXES; j++)
-    {
-      leds[hexes[j].spiral[0]] = CHSV(255 / 7 * j + hueOffset, saturation, 100);
-      leds[hexes[j].spiral[spiralIndex]] = CHSV(255 / 7 * j + hueOffset, saturation, 100);
-    }
-    delay(100);
+  int saturation = 8 * spiralIndex;
+  for (int j = 0; j < NUMHEXES; j++)
+  {
+    leds[hexes[j].spiral[0]] = CHSV(255 / 7 * j + hueOffset, saturation-10, 90);
+    leds[hexes[j].spiral[spiralIndex]] = CHSV(255 / 7 * j + hueOffset, saturation, 100);
+  }
+  delay(100);
 
   increaseHue(5);
-  spiralIndex++;
   spiralIndex %= 19;
+  spiralIndex++;
 }
 
 // rainbow shifting across rings
@@ -315,21 +315,21 @@ void IdlePatternThree()
   {
     for (int i = 0; i < NUMHEXES; i++)
     {
-      leds[hexes[i].center[j]] = CHSV(0 + 255 / 9 * i + hueOffset, 255, 100);
+      leds[hexes[i].center[j]] = CHSV(0 + 255 / 9 * i * .8 + hueOffset, 255, 100);
     }
   }
   for (int j = 0; j < MIDDLELEN; j++)
   {
     for (int i = 0; i < NUMHEXES; i++)
     {
-      leds[hexes[i].middle[j]] = CHSV(20 + 255 / 9 * i + hueOffset, 255, 100);
+      leds[hexes[i].middle[j]] = CHSV(20 + 255 / 9 * i * .8 + hueOffset, 255, 100);
     }
   }
   for (int j = 0; j < OUTERLEN; j++)
   {
     for (int i = 0; i < NUMHEXES; i++)
     {
-      leds[hexes[i].outer[j]] = CHSV(40 + 255 / 9 * i + hueOffset, 255, 100);
+      leds[hexes[i].outer[j]] = CHSV(40 + 255 / 9 * i * .8 + hueOffset, 255, 100);
     }
   }
   increaseHue(1);
@@ -350,6 +350,35 @@ void IdlePatternFour()
   increaseHue(3);
 }
 
+// okay but what if it was all rings
+void IdlePatternFour_fullsend()
+{
+  for (int i = 0; i < 42; i++)
+  {
+    leds[outline[i]] = CHSV(hueOffset + (255 / 42 * i), 255, 100);
+  }
+  for (int i = 0; i < 36; i++)
+  {
+    leds[outline2[i]] = CHSV(hueOffset + (255 / 36 * i), 255, 100);
+  }
+  for (int i = 0; i < 30; i++)
+  {
+    leds[outline3[i]] = CHSV(hueOffset + (255 / 30 * i), 255, 100);
+  }
+  for (int i = 0; i < 6; i++)
+  {
+    leds[outline4[i]] = CHSV(hueOffset + (255 / 6 * i), 255, 100);
+  }
+  for (int j = 0; j < 12; j++)
+  {
+    leds[hexes[6].ring3[j]] = CHSV(hueOffset + (255 / 12 * (j+1)), 255, 100);
+  }
+  for (int j = 0; j < 6; j++)
+  {
+    leds[hexes[6].ring2[j]] = CHSV(hueOffset + (255 / 6 * (j+1)), 255, 100);
+  }
+  increaseHue(3);
+}
 
 //each hex spirals out, and then spirals off out
 void IdlePatternFive()

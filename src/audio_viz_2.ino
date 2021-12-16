@@ -37,7 +37,7 @@ IdleFunction idlePatterns[] = {
     IdlePatternOne_better,
     IdlePatternTwo,
     IdlePatternThree,
-    IdlePatternFour,
+    IdlePatternFour_fullsend,
     IdlePatternFive,
     pacifica_loop,
     Fire2012WithPalette,
