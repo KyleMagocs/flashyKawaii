@@ -15,11 +15,41 @@ CRGBArray<NUM_LEDS> leds;
 #define COLOR_ORDER BGR
 #define BRIGHTNESS 200
 
-#define BASS_THRESHOLD 12
-
 // int levelMax[] = { 0, 0, 0, 0, 0, 0, 0, 0 };
 int startHues[8] = {0, 30, 60, 90, 120, 150, 180, 210};
 int hueOffset = 0;
+
+#pragma region palettes
+CRGB purple = CHSV(HUE_PURPLE, 255, 255);
+CRGB green = CHSV(HUE_GREEN, 255, 255);
+CRGB black = CRGB::Black;
+CRGB white = CRGB::White;
+
+CRGBPalette16 GreenAndPurple_p = CRGBPalette16(
+    green, green, black, black,
+    purple, purple, black, black,
+    green, green, black, black,
+    purple, purple, black, black);
+
+CRGBPalette16 WhiteStripes_p = CRGBPalette16(
+    CRGB::Red, black, black, black,
+    CRGB::Blue, black, black, black,
+    CRGB::Green, black, black, black,
+    CRGB::Blue, black, black, black);
+
+// Gradient palette "bhw2_50_gp", originally from
+// http://soliton.vm.bytemark.co.uk/pub/cpt-city/bhw/bhw2/tn/bhw2_50.png.index.html
+// converted for FastLED with gammas (2.6, 2.2, 2.5)
+// Size: 20 bytes of program space.
+
+DEFINE_GRADIENT_PALETTE( bhw2_50_gp ) {
+    0,   8,  2, 23,
+   84,  47,  7,102,
+  138,  16, 46,147,
+  173,   2,127,203,
+  255,   1,  7, 11};
+
+#pragma endregion
 
 #pragma region UTILS
 void init_leds()
@@ -33,18 +63,25 @@ void increaseHue(int amount)
   hueOffset = (hueOffset + amount) % 255;
 }
 
-// todo: move to util lib
-int huechangecounter = 0; // we don't want to change every dang millisecond, yknow?
-bool changeHueOnBass(float levels[])
+int wheelIndex = 0;
+void increaseWheel(int amount)
 {
-  huechangecounter++;
+  wheelIndex = (wheelIndex + amount) % 255;
+}
+
+#define BASS_THRESHOLD 20
+int basscounter = 0; // we don't want to change every dang millisecond, yknow?
+bool bassHit(float levels[])
+{
+  basscounter++;
   if (levels[0] > BASS_THRESHOLD)
   {
     // Serial.printf("Bass Counter: %d\n", huechangecounter);
-    if (huechangecounter > 10)
+    if (basscounter > 2)
     { // yes, this could have been a &&, but separating the ifs helps debug
-      huechangecounter = 0;
-      increaseHue(20);
+      basscounter = 0;
+      Serial.println(levels[0]);
+      // increaseHue(20);
       return true;
     }
   }
@@ -57,6 +94,46 @@ void fadeAllLeds()
   {
     leds[i].fadeToBlackBy(90);
   }
+}
+
+void drawWheelWithPalette(int value, CRGBPalette16 palette)
+{
+  for (int i = 0; i < 42; i++)
+  {
+    // leds[outline[i]] = CHSV(hueOffset + (255 / 42 * i*num_rainbows), 255, value);
+    leds[outline[i]] = ColorFromPalette(palette, scale8( 255 / 42 * i + wheelIndex, 240), BRIGHTNESS, LINEARBLEND);
+  }
+  for (int i = 0; i < 36; i++)
+  {
+    // leds[outline2[i]] = CHSV(hueOffset + (255 / 36 * i*num_rainbows), 255, value);
+    leds[outline2[i]] = ColorFromPalette(palette, scale8( 255 / 36 * i + wheelIndex, 240), BRIGHTNESS, LINEARBLEND);
+  }
+  for (int i = 0; i < 30; i++)
+  {
+    leds[outline3[i]] = ColorFromPalette(palette, scale8( 255 / 30 * i + wheelIndex, 240), BRIGHTNESS, LINEARBLEND);
+    // leds[outline3[i]] = CHSV(hueOffset + (255 / 30 * i*num_rainbows), 255, value);
+  }
+  for (int i = 0; i < 6; i++)
+  {
+    leds[outline4[i]] = ColorFromPalette(palette, scale8( 255 / 6 * i + wheelIndex, 240), BRIGHTNESS, LINEARBLEND);
+    // leds[outline4[i]] = CHSV(hueOffset + (255 / 6 * i*num_rainbows), 255, value);
+  }
+  wheelIndex++;
+  wheelIndex %= 255;
+  // for (int j = 0; j < 12; j++)
+  // {
+  //   leds[hexes[6].ring3[j]] = CHSV(hueOffset + (255 / 12 * (j+1)), 255, value);
+  // }
+  // for (int j = 0; j < 6; j++)
+  // {
+  //   leds[hexes[6].ring2[j]] = CHSV(hueOffset + (255 / 6 * (j+1)), 255, value);
+  // }
+  // increaseHue(3);
+}
+
+void drawRainbowWheel(int value)
+{
+  drawWheelWithPalette(value, RainbowColors_p);
 }
 
 // just flashes all the lights white so I know it booted up.
@@ -139,7 +216,7 @@ void patternFour(float levels[])
 // each hex BUMPS and changes color on bass
 void patternFive(float levels[])
 {
-  changeHueOnBass(levels);
+  bassHit(levels);
 
   for (int i = 0; i < 7; i++)
   {
@@ -246,6 +323,37 @@ void patternEight(float levels[])
       leds[hexes[6].outer[j]] = CHSV(85, 0, BRIGHTNESS);
 }
 
+// okay just hear me out on this one
+void patternNine(float levels[])
+{
+
+  int band_value = int(levels[0]);
+  if (band_value > 2)
+    for (int j = 0; j < INNERLEN; j++)
+      leds[hexes[6].center[j]] = CHSV(85, 0, BRIGHTNESS);
+  if (band_value > 7)
+    for (int j = 0; j < MIDDLELEN; j++)
+      leds[hexes[6].middle[j]] = CHSV(85, 0, BRIGHTNESS);
+  if (band_value > 12)
+    for (int j = 0; j < OUTERLEN; j++)
+      leds[hexes[6].outer[j]] = CHSV(85, 0, BRIGHTNESS);
+
+  if (bassHit(levels))
+  {
+    for (int i = 0; i < 20; i++)
+    {
+      increaseWheel(1);
+      drawWheelWithPalette(BRIGHTNESS, bhw2_50_gp);
+      FastLED.show();
+      delay(.2);
+    }
+  }
+  else
+  {
+    increaseWheel(.5);
+    drawWheelWithPalette(BRIGHTNESS, bhw2_50_gp);
+  }
+}
 #pragma endregion
 
 #pragma region idle patterns
@@ -287,7 +395,7 @@ void IdlePatternOne_better()
   int saturation = 8 * spiralIndex;
   for (int j = 0; j < NUMHEXES; j++)
   {
-    leds[hexes[j].spiral[0]] = CHSV(255 / 7 * j + hueOffset, saturation-10, 90);
+    leds[hexes[j].spiral[0]] = CHSV(255 / 7 * j + hueOffset, saturation - 10, 90);
     leds[hexes[j].spiral[spiralIndex]] = CHSV(255 / 7 * j + hueOffset, saturation, 100);
   }
   delay(100);
@@ -353,31 +461,13 @@ void IdlePatternFour()
 // okay but what if it was all rings
 void IdlePatternFour_fullsend()
 {
-  for (int i = 0; i < 42; i++)
-  {
-    leds[outline[i]] = CHSV(hueOffset + (255 / 42 * i), 255, 100);
-  }
-  for (int i = 0; i < 36; i++)
-  {
-    leds[outline2[i]] = CHSV(hueOffset + (255 / 36 * i), 255, 100);
-  }
-  for (int i = 0; i < 30; i++)
-  {
-    leds[outline3[i]] = CHSV(hueOffset + (255 / 30 * i), 255, 100);
-  }
-  for (int i = 0; i < 6; i++)
-  {
-    leds[outline4[i]] = CHSV(hueOffset + (255 / 6 * i), 255, 100);
-  }
-  for (int j = 0; j < 12; j++)
-  {
-    leds[hexes[6].ring3[j]] = CHSV(hueOffset + (255 / 12 * (j+1)), 255, 100);
-  }
-  for (int j = 0; j < 6; j++)
-  {
-    leds[hexes[6].ring2[j]] = CHSV(hueOffset + (255 / 6 * (j+1)), 255, 100);
-  }
-  increaseHue(3);
+  drawRainbowWheel(100);
+}
+
+void IdlePatternSix()
+{
+  CRGBPalette16 pal = PartyColors_p;
+  drawWheelWithPalette(140, pal);
 }
 
 //each hex spirals out, and then spirals off out
@@ -499,6 +589,14 @@ void Fire2012WithPalette()
     leds[fullSpiral[pixelnumber]] = color;
     // leds[pixelnumber] = color;
   }
+}
+
+void FireCool()
+{
+
+  // Second, this palette is like the heat colors, but blue/aqua instead of red/yellow
+  gPal = CRGBPalette16(CRGB::Black, CRGB::Blue, CRGB::Aqua, CRGB::White);
+  Fire2012WithPalette();
 }
 #pragma endregion
 

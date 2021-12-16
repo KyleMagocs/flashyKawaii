@@ -95,7 +95,7 @@ Hex::Hex(int index)
   spiral[18] = 1 + mod;
 
   if (index == 6)
-  {                              // center ring is different, obv
+  {                              // center hex is different, obv
     ring1 = new int[1]{9 + mod}; // I'm tired of trying to deal with pointers
     ring2 = new int[6]{ mod + 10, mod + 14, mod + 15, mod + 8, mod + 4, mod + 3};
     ring3 = new int[12]{ 2 + mod, 11 + mod, 12 + mod, 13 + mod, 16 + mod, 17 + mod, 18 + mod, 7 + mod, 6 + mod, 5 + mod, 0 + mod, 1 + mod};
@@ -136,11 +136,21 @@ Hex hexes[7];
 Hex orderedHexes[7];
 int counter = 0;
 int counter2 = 0;
+int counter3 = 0;
+int counter4 = 0;
+int counter5 = 0;
+int counter6 = 0;
+
 
 int outline[42];
+int outline2[36];
+int outline3[30];
+int outline4[6];
 void initOutline()
 {
   counter = 0;
+  counter2 = 0;
+  counter3 = 0;
   for (int i = 0; i < 6; i++)
   { // each hex is wired radially symetrically so we can just... do this.
     outline[counter++] = 1 + (i * 19);
@@ -150,6 +160,21 @@ void initOutline()
     outline[counter++] = 13 + (i * 19);
     outline[counter++] = 16 + (i * 19);
     outline[counter++] = 17 + (i * 19);
+
+    outline2[counter2++] = 0 + (i*19);
+    outline2[counter2++] = 3 + (i*19);
+    outline2[counter2++] = 10 + (i*19);
+    outline2[counter2++] = 14 + (i*19);
+    outline2[counter2++] = 15 + (i*19);
+    outline2[counter2++] = 18 + (i*19);
+
+    outline3[counter3++] = 5 + (i*19);
+    outline3[counter3++] = 4 + (i*19);
+    outline3[counter3++] = 9 + (i*19);
+    outline3[counter3++] = 8 + (i*19);
+    outline3[counter3++] = 7 + (i*19);
+
+    outline4[counter4++] = 6 + (i*19);
   }
 }
 
