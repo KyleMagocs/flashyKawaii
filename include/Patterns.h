@@ -43,20 +43,20 @@ void increaseWheel(int amount)
 int basscounter = 0; // we don't want to change every dang millisecond, yknow?
 bool bassHit(float levels[])
 {
-  return getLowBeat();
-  // basscounter++;
-  // if (levels[0] > BASS_THRESHOLD)
-  // {
-  //   // Serial.printf("Bass Counter: %d\n", huechangecounter);
-  //   if (basscounter > 2)
-  //   { // yes, this could have been a &&, but separating the ifs helps debug
-  //     basscounter = 0;
-  //     Serial.println(levels[0]);
-  //     // increaseHue(20);
-  //     return true;
-  //   }
-  // }
-  // return false;
+  // return getLowBeat();
+  basscounter++;
+  if (levels[0] > BASS_THRESHOLD)
+  {
+    // Serial.printf("Bass Counter: %d\n", huechangecounter);
+    if (basscounter > 2)
+    { // yes, this could have been a &&, but separating the ifs helps debug
+      basscounter = 0;
+      Serial.println(levels[0]);
+      // increaseHue(20);
+      return true;
+    }
+  }
+  return false;
 }
 
 void fadeAllLeds()

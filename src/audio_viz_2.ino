@@ -107,18 +107,9 @@ void loop()
 {
   if (drawTimer > 1000 / FPS)
   {
-    beatDetectionLoop();
+    // beatDetectionLoop();  // I'm pretty sure all this really does is slow everything down, so let's not.
     if (fft256_1.available())
     {
-
-      // if (patternSwitch / 1000 % 1 == 0){
-      //   Serial.printf("beat:%d ", getLowBeat());
-      //   Serial.printf("virtual:%d ", getVirtualBeat());
-      //   Serial.printf("bpm:%d ", getBpmBeat());
-      //   Serial.printf("pattern:%d ", patternIndex);
-      //   Serial.printf("idle:%d ", idleIndex);
-      // }
-
       drawTimer = 0;
       fadeAllLeds();
       float levels[8];
@@ -127,6 +118,8 @@ void loop()
       {
         idleIndex = random(NUMIDLEPATTERNS);
         patternIndex = random(NUMPATTERNS);
+        Serial.printf("pattern:%d ", patternIndex);
+        Serial.printf("idle:%d ", idleIndex);
         patternSwitch = 0;
         increaseHue(random(128)); // why not?
       }
