@@ -14,12 +14,12 @@
 
 #include "Hex.h"
 #include "Patterns.h"
+#include "IdlePatterns.h"
 #include "AudioControl.h"
 
 #define PATTERN_TIMER 30
 #define FPS 15
 
-#define NUMPATTERNS 7
 typedef void (*PatternFunction)(float levels[]);
 PatternFunction allPatterns[] = {
     // patternOne,
@@ -30,21 +30,26 @@ PatternFunction allPatterns[] = {
     patternSix,
     patternSeven,
     patternEight,
-    patternNine};
+    patternNine,
+    patternTen};
+int NUMPATTERNS = sizeof(allPatterns) / sizeof(PatternFunction);
 
-#define NUMIDLEPATTERNS 9
 typedef void (*IdleFunction)();
 IdleFunction idlePatterns[] = {
     // IdlePatternOne_better,  // started crashing and I don't like it enough to care
     IdlePatternTwo,
     IdlePatternThree,
     IdlePatternFour_fullsend,
-    IdlePatternFive,
+    // IdlePatternFive,
     pacifica_loop,
-    Fire2012WithPalette,
+    FireNormal,
     FireCool,
     TestPatternFour,
-    TestPatternThree};
+    TestPatternThree,
+    TestPatternThree_Matrix,
+    TestPatternFive
+    };
+int NUMIDLEPATTERNS = sizeof(idlePatterns) / sizeof(IdleFunction);
 
 int patternIndex;
 int idleIndex;
@@ -69,10 +74,8 @@ void printBands()
   {
     int from = int(exp(log(bins) * b / bands));
     int to = int(exp(log(bins) * (b + 1) / bands));
-    if (from == 0)
-      Serial.printf("%1d, %1d\n", from, to - 2); // maual tweaking off the beaten path woo
-    else
-      Serial.printf("%1d, %1d\n", from - 1, to - 2);
+    Serial.printf("%1d, %1d\n", from-1, to); // maual tweaking off the beaten path woo
+    
     // Serial.printf("To   = %1d\n", to-1);
   }
 }
@@ -114,6 +117,7 @@ void loop()
       fadeAllLeds();
       float levels[8];
       LoadLevels1024(levels);
+      bassHit(levels);
       if (patternSwitch / 1000 > PATTERN_TIMER)
       {
         idleIndex = random(NUMIDLEPATTERNS);
@@ -121,7 +125,10 @@ void loop()
         Serial.printf("pattern:%d ", patternIndex);
         Serial.printf("idle:%d ", idleIndex);
         patternSwitch = 0;
-        increaseHue(random(128)); // why not?
+        increaseHue(random(128)); // randomize our manual palette
+        randomizePalette();  // randomize the index of our pre-def palettes
+        decayFactor = 90; // reset it, let patterns choose to change it.
+        Serial.println();
       }
 
       if (levels[0] > 1)
@@ -130,16 +137,17 @@ void loop()
       }
       if (idleTimer / 1000 > 30)
       {
+        FastLED.setBrightness(IDLEBRIGHTNESS);
         patternSwitch = patternSwitch - 10; // slow down a bit if we're in idle mode
         idlePatterns[idleIndex]();
       }
       else
       {
+        FastLED.setBrightness(BRIGHTNESS );
         // patternNine(levels);
         allPatterns[patternIndex](levels);
       }
       FastLED.show();
-      // Serial.println();
     }
     else
     {
