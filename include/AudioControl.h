@@ -4,6 +4,7 @@
 #include <Audio.h>
 #include "BeatDetector.h"
 #define LOG_FFT false
+bool logLevel[] = {false, false, false, false, false, false, false, false}; // if you want to get particular
 const int myInput = AUDIO_INPUT_LINEIN;
 #define BEATTIME 20
 
@@ -18,6 +19,7 @@ AudioConnection patchCord2(i2s2, 0, mixer1, 1);
 //AudioConnection          patchCord3(i2s2, 1, i2s1, 1);
 AudioConnection patchCord4(i2s2, 1, mixer1, 2);
 AudioConnection patchCord5(mixer1, fft256_1);
+AudioConnection patchCord6(mixer1, fft1024_1);
 
 AudioControlSGTL5000 audioShield;
 
@@ -26,13 +28,18 @@ BeatDetector beatDetector(fft256_1);
 void logLevels(float levels[8])
 {
   if (!LOG_FFT)
+  {
     return;
+  }
   for (int i = 0; i < 8; i++)
   {
-    int band_value = int(levels[i]);
-    Serial.print(String(band_value) + " ");
+    if (logLevel[i])
+    {
+      int band_value = int(levels[i]);
+      Serial.printf("%d:%d ", i, band_value);
+    }
   }
-  Serial.println("");
+
 }
 
 // float * LoadLevels(float levels[8]) {
@@ -64,26 +71,26 @@ float *LoadLevels(float levels[8])
   levels[3] = fft256_1.read(6, 13) * 20;
   levels[4] = fft256_1.read(14, 30) * 20;
   levels[5] = fft256_1.read(31, 61) * 20;
-  levels[6] = fft256_1.read(62, 125) * 20;
-  levels[7] = fft256_1.read(126, 254) * 20;
+  levels[6] = fft256_1.read(62, 125) * 30;
+  levels[7] = fft256_1.read(126, 254) * 30;
   logLevels(levels);
   return levels;
 }
 
 float *LoadLevels1024(float levels[8])
 {
-  // read the 256 FFT frequencies into 16 levels
+  // read the 1024 FFT frequencies into 16 levels
   // music is heard in octaves, but the FFT data
   // is linear, so for the higher octaves, read
   // many FFT bins together.
-  levels[0] = fft256_1.read(0, 0) * 20;
-  levels[1] = fft256_1.read(1, 3) * 20;
-  levels[2] = fft256_1.read(4, 11) * 20;
-  levels[3] = fft256_1.read(12, 30) * 20;
-  levels[4] = fft256_1.read(31, 74) * 20;
-  levels[5] = fft256_1.read(75, 179) * 20;
-  levels[6] = fft256_1.read(180, 428) * 20;
-  levels[7] = fft256_1.read(429, 1022) * 20;
+  levels[0] = fft1024_1.read(0, 2) * 20;
+  levels[1] = fft1024_1.read(1, 5) * 20;
+  levels[2] = fft1024_1.read(4, 13) * 20;
+  levels[3] = fft1024_1.read(12, 32) * 20;
+  levels[4] = fft1024_1.read(31, 76) * 20;
+  levels[5] = fft1024_1.read(75, 181) * 20;
+  levels[6] = fft1024_1.read(180, 430) * 20;
+  levels[7] = fft1024_1.read(429, 1024) * 130; // this one needs a pretty heavy boost
   logLevels(levels);
   return levels;
 }
@@ -99,7 +106,6 @@ void init_audio()
   fft256_1.averageTogether(3);
   fft1024_1.averageTogether(3);
 }
-
 
 bool lowBeat = false;
 bool virtualBeat = false;
@@ -129,7 +135,7 @@ void beatDetectionLoop()
   lowBeat = lowBeatLedTimer < BEATTIME; //Beat has been detected above
 
   virtualBeat = virtualLedTimer < BEATTIME; //Beat has been detected above
-  
+
   bpmBeat = validBpmLedTimer < BEATTIME; //validBPM
 
   // Serial.printf("low:%d ",lowBeat);
@@ -137,17 +143,20 @@ void beatDetectionLoop()
   // Serial.printf("bpm:%d ",bpmBeat);
 }
 
-bool getLowBeat(){
+bool getLowBeat()
+{
   // Serial.println(lowBeat);
   return lowBeat;
 }
 
-bool getVirtualBeat(){
+bool getVirtualBeat()
+{
   // Serial.printf("virtual:%d ",virtualBeat);
   return virtualBeat;
 }
 
-bool getBpmBeat(){
+bool getBpmBeat()
+{
   return bpmBeat;
 }
 
