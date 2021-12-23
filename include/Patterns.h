@@ -6,18 +6,19 @@
 #include "Hex.h"
 #include "Palette.h"
 #include "AudioControl.h"
+#include "constants.h"
 #define USE_WS2812SERIAL // the teensy 4 haaaaates you if you don't do this
 #define FASTLED_INTERNAL
 
 #define DECAYSPEED 1
 #define DATA_PIN 14
-#define NUM_LEDS 134
-CRGBArray<NUM_LEDS> leds;
+#define NUM_LEDS 150 // only actually 133, sorta 134, but FastLED is pulling some shenanigans, so.
+CRGBArray<150> leds;
 #define LED_TYPE WS2812SERIAL
 #define COLOR_ORDER BGR
 #define BRIGHTNESS 200
 
-int decayFactor = 90;
+int decayFactor = DECAY / 2;
 // int levelMax[] = { 0, 0, 0, 0, 0, 0, 0, 0 };
 int idleStartHues[8] = {0, 30, 60, 90, 120, 150, 180, 210};
 int hueOffset = 0;
@@ -25,7 +26,8 @@ int hueOffset = 0;
 #pragma region UTILS
 void init_leds()
 {
-  FastLED.addLeds<LED_TYPE, DATA_PIN, COLOR_ORDER>(leds, NUM_LEDS);
+  FastLED.addLeds<LED_TYPE, DATA_PIN, COLOR_ORDER>(leds, 150);
+  // FastLED.addLeds<LED_TYPE, DATA_PIN, COLOR_ORDER>(secret_leds, 150);
 }
 
 // move to util lib
@@ -154,6 +156,14 @@ void startupTest()
   }
 }
 
+
+// fastLED does something to light up lights past the 133 so like, let's just force those off, I guess!
+void killTheExtras(){
+  for(int i = 134; i < 150; i++){
+    Serial.printf("Clearing led: %d ", i);
+    leds[i] = CHSV(0,0,0);
+  }
+}
 #pragma endregion
 
 #pragma region REALPATTERNS
@@ -274,7 +284,7 @@ void patternSix(float levels[])
 
     for (int j = 0; (j < band_value && j < 19); j++)
     {
-      leds[hexes[6 - i].spiral[18 - j]] = CHSV(hue, 255, 120);
+      leds[hexes[6 - i].spiral[18 - j]] = CHSV(hue, 255, BRIGHTNESS);
     }
   }
 }
@@ -390,7 +400,7 @@ void patternNine(float levels[])
 // it's like nine but a bit more bass-important?
 void patternTen(float levels[])
 {
-  decayFactor = 45;
+  decayFactor = DECAY / 2;
   int band_value = int(levels[0]);
   if (band_value > 2)
     for (int j = 0; j < INNERLEN; j++)

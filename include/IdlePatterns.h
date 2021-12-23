@@ -157,7 +157,7 @@ void TestPatternTwo()
 int testThreeCounters[] = {0, 44, 88};
 void TestPatternThree()
 {
-  decayFactor = 15;
+  decayFactor = DECAY / 4;
 
   for(int i = 0; i < 3; i++){
     if (testThreeCounters[i] == 19) testThreeCounters[i]++;
@@ -174,7 +174,7 @@ void TestPatternThree()
 int testThreeMatrixCounters[] = {0, 33, 66, 99};
 void TestPatternThree_Matrix()
 {
-  decayFactor = 50;
+  decayFactor = DECAY / 2;
   for(int i = 0; i < 4; i++){
     if (testThreeMatrixCounters[i] == 19) testThreeMatrixCounters[i]++;
     leds[fullSpiral[testThreeMatrixCounters[i]++]] = CHSV(85, 255, IDLEBRIGHTNESS);
@@ -202,7 +202,7 @@ void TestPatternFour()
 // I did this on accident once so let's roll with it, eh?
 void TestPatternFive()
 {
-  decayFactor = 15;
+  decayFactor = DECAY / 4;
 
   for(int i = 0; i < 3; i++){
     if (testThreeCounters[i] == 114) testThreeCounters[i] = 115; // we skipped one in the wiring, so skip it here, too.

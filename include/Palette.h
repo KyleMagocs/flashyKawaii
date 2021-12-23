@@ -252,6 +252,7 @@ CRGBPalette16 allPalettes[] = {
     GreenAndPurple_p,
     cool_gp,
     yarg_gp,
+    Matrix_p,
     // WhiteStripes_p // ack it just looks like ass because I'm not injecting better power
     winter_gp
 };

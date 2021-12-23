@@ -16,9 +16,7 @@
 #include "Patterns.h"
 #include "IdlePatterns.h"
 #include "AudioControl.h"
-
-#define PATTERN_TIMER 30
-#define FPS 15
+#include "constants.h"
 
 typedef void (*PatternFunction)(float levels[]);
 PatternFunction allPatterns[] = {
@@ -115,6 +113,7 @@ void loop()
     {
       drawTimer = 0;
       fadeAllLeds();
+      killTheExtras(); // have yet to figure out why I gotta do this.
       float levels[8];
       LoadLevels1024(levels);
       bassHit(levels);
@@ -127,7 +126,7 @@ void loop()
         patternSwitch = 0;
         increaseHue(random(128)); // randomize our manual palette
         randomizePalette();  // randomize the index of our pre-def palettes
-        decayFactor = 90; // reset it, let patterns choose to change it.
+        decayFactor = DECAY; // reset it, let patterns choose to change it.
         Serial.println();
       }
 
@@ -144,7 +143,7 @@ void loop()
       else
       {
         FastLED.setBrightness(BRIGHTNESS );
-        // patternNine(levels);
+        // patternTen(levels);
         allPatterns[patternIndex](levels);
       }
       FastLED.show();

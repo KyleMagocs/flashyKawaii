@@ -8,7 +8,7 @@
 #define OUTERLEN 12
 #define NUMHEXES 7
 
-#define NUM_LEDS 134
+#define NUM_LEDS 150
 
 class Hex
 {
@@ -235,7 +235,7 @@ void init_hexes()
   // Serial.println("spirals and rings done");
 }
 
-void setRingColor(CRGBArray<NUM_LEDS> &leds, int ring, CHSV color)
+void setRingColor(CRGBArray<150> &leds, int ring, CHSV color)
 { 
   // Serial.printf("Gonna set ring %d\n", ring);
   for (int i = 0; i < allRingLens[ring]; i++)
