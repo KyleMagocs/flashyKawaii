@@ -413,7 +413,7 @@ void p_spinTheWheel(float levels[])
 // it's like nine but a bit more bass-important?
 void p_fadeWheel(float levels[])
 {
-  decayFactor = DECAY / 2;
+  decayFactor = DECAY / 2.5;
   int band_value = int(levels[0]);
   if (band_value > 2)
     for (int j = 0; j < INNERLEN; j++)
@@ -430,6 +430,7 @@ void p_fadeWheel(float levels[])
     for (int i = 0; i < 20; i++)
     {
       increaseWheel(.5);
+
       drawWheelWithPalette(BRIGHTNESS, getCurrentPalette());
       FastLED.show();
       delay(.25);
