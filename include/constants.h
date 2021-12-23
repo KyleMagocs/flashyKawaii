@@ -4,7 +4,7 @@
 #define PATTERN_TIMER 30
 #define IDLE_TIMEOUT 45
 #define FPS 15
-#define MAGIC_NUMBER 2200  // used to calculate decay factor
+#define MAGIC_NUMBER 2400  // used to calculate decay factor
 #define DECAY MAGIC_NUMBER/FPS
 
 #define BASS_THRESHOLD 15

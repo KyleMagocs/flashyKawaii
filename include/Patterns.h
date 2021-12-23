@@ -191,6 +191,7 @@ void p_spiralout_rainbow(float levels[])
 // this one does the dope rings for each band, and is the best one
 void p_ringBands(float levels[])
 {
+  decayFactor = DECAY/2;
   for (int i = 0; i < 8; i++)
   {
     int hue = (i * (255 / 8) + hueOffset);
@@ -211,6 +212,7 @@ void p_ringBands(float levels[])
 // it's pattern three.  but with the rings sorta inverted.  Not actually inverted.  Winging it here.  Cut me some slack.
 void p_ringBands_inverted(float levels[])
 {
+  decayFactor = DECAY/2;
   for (int i = 0; i < 8; i++)
   {
     int hue = (i * (255 / 8) + hueOffset);
