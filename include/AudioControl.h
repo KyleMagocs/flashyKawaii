@@ -84,8 +84,8 @@ float *LoadLevels1024(float levels[8])
   // is linear, so for the higher octaves, read
   // many FFT bins together.
   levels[0] = fft1024_1.read(0, 2) * 20;
-  levels[1] = fft1024_1.read(1, 5) * 20;
-  levels[2] = fft1024_1.read(4, 13) * 20;
+  levels[1] = fft1024_1.read(1, 5) * 15;
+  levels[2] = fft1024_1.read(4, 13) * 15;
   levels[3] = fft1024_1.read(12, 32) * 20;
   levels[4] = fft1024_1.read(31, 76) * 20;
   levels[5] = fft1024_1.read(75, 181) * 20;

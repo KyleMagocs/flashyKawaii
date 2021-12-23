@@ -8,11 +8,11 @@
 #include "Patterns.h"
 #include "AudioControl.h"
 
-#define IDLEBRIGHTNESS 150
+
 
 #pragma region idle patterns
 //each hex spirals out, and then spirals back in
-void IdlePatternOne()
+void ip_spiralout_spiralin()
 {
   int saturation = 0;
 
@@ -44,7 +44,7 @@ void IdlePatternOne()
 
 //each hex spirals out.
 int spiralIndex = 0;
-void IdlePatternOne_better()
+void ip_spiralout()
 {
   int saturation = 8 * spiralIndex;
   for (int j = 0; j < NUMHEXES; j++)
@@ -60,7 +60,7 @@ void IdlePatternOne_better()
 }
 
 // rainbow shifting across rings
-void IdlePatternTwo()
+void ip_rainbowrings()
 {
   for (int i = 0; i < 8; i++)
   {
@@ -71,7 +71,7 @@ void IdlePatternTwo()
 }
 
 // rainbow across each hex's rings
-void IdlePatternThree()
+void ip_rainbowhexes()
 {
   for (int j = 0; j < INNERLEN; j++)
   {
@@ -99,7 +99,7 @@ void IdlePatternThree()
 
 // sets the outline of the board and the inner hex to shifting colors.
 // I dunno it looks cool.
-void IdlePatternFour()
+void ip_outline()
 {
   for (int i = 0; i < 42; i++)
   {
@@ -113,19 +113,21 @@ void IdlePatternFour()
 }
 
 // okay but what if it was all rings
-void IdlePatternFour_fullsend()
+void ip_spinner_rainbow()
 {
   drawRainbowWheel(100);
 }
 
-void IdlePatternSix()
+void ip_spinner_party()
 {
   CRGBPalette16 pal = PartyColors_p;
   drawWheelWithPalette(140, pal);
 }
 
 //each hex spirals out, and then spirals off out
-void IdlePatternFive()
+// I think?
+// I'm pretty sure this one sucks and/or was buggy
+void ip_spiralout_rainbow()
 {
   spiralIndex %= 19;
   for (int j = 0; j < NUMHEXES; j++)
@@ -135,85 +137,68 @@ void IdlePatternFive()
 
   increaseHue(5);
 }
-#pragma endregion
-
-#pragma region TEST_PATTERNS
-// test trash, don't use
-// or maybe re-visit, I dunno.
-int test_counter = 0;
-void TestPatternOne()
-{
-  leds[hexes[6].ring3[test_counter]] = CHSV(0, 0, IDLEBRIGHTNESS);
-  test_counter = (test_counter + 1) % 12;
-}
-
-// it just sets ring 4.  It was used for testing rings.
-void TestPatternTwo()
-{
-  setRingColor(leds, 4, CHSV(0, 255, IDLEBRIGHTNESS));
-}
 
 // spiral out from the center
-int testThreeCounters[] = {0, 44, 88};
-void TestPatternThree()
+int rgbSpiralCounters[] = {0, 44, 88};
+void ip_spiral_rgb()
 {
   decayFactor = DECAY / 4;
 
   for(int i = 0; i < 3; i++){
-    if (testThreeCounters[i] == 19) testThreeCounters[i]++;
+    if (rgbSpiralCounters[i] == 19) rgbSpiralCounters[i]++;
   }
 
-  leds[fullSpiral[testThreeCounters[0]++]] = CHSV(0, 255, IDLEBRIGHTNESS);
-  leds[fullSpiral[testThreeCounters[1]++]] = CHSV(85, 255, IDLEBRIGHTNESS);
-  leds[fullSpiral[testThreeCounters[2]++]] = CHSV(170, 255, IDLEBRIGHTNESS);
-  testThreeCounters[0] %= (NUM_LEDS - 1);
-  testThreeCounters[1] %= (NUM_LEDS - 1);
-  testThreeCounters[2] %= (NUM_LEDS - 1);
+  leds[fullSpiral[rgbSpiralCounters[0]++]] = CHSV(0, 255, IDLEBRIGHTNESS);
+  leds[fullSpiral[rgbSpiralCounters[1]++]] = CHSV(85, 255, IDLEBRIGHTNESS);
+  leds[fullSpiral[rgbSpiralCounters[2]++]] = CHSV(170, 255, IDLEBRIGHTNESS);
+  rgbSpiralCounters[0] %= (NUM_LEDS - 1);
+  rgbSpiralCounters[1] %= (NUM_LEDS - 1);
+  rgbSpiralCounters[2] %= (NUM_LEDS - 1);
 }
 
-int testThreeMatrixCounters[] = {0, 33, 66, 99};
-void TestPatternThree_Matrix()
+int matrixSpiralCounters[] = {0, 33, 66, 99};
+void ip_spiral_matrix()
 {
   decayFactor = DECAY / 2;
   for(int i = 0; i < 4; i++){
-    if (testThreeMatrixCounters[i] == 19) testThreeMatrixCounters[i]++;
-    leds[fullSpiral[testThreeMatrixCounters[i]++]] = CHSV(85, 255, IDLEBRIGHTNESS);
-    if (testThreeMatrixCounters[i] == 19) testThreeMatrixCounters[i]++; // lol I'm sure there's a better way to do this other than checking it twice but whatever
-    testThreeMatrixCounters[i] %= (NUM_LEDS-1);
-    leds[fullSpiral[testThreeMatrixCounters[i]]] = CHSV(85, 100, IDLEBRIGHTNESS-40);
+    if (matrixSpiralCounters[i] == 19) matrixSpiralCounters[i]++;
+    leds[fullSpiral[matrixSpiralCounters[i]++]] = CHSV(85, 255, IDLEBRIGHTNESS);
+    if (matrixSpiralCounters[i] == 19) matrixSpiralCounters[i]++; // lol I'm sure there's a better way to do this other than checking it twice but whatever
+    matrixSpiralCounters[i] %= (NUM_LEDS-1);
+    leds[fullSpiral[matrixSpiralCounters[i]]] = CHSV(85, 100, IDLEBRIGHTNESS-40);
   }
   delay(120); // slow it down.  slow it waaaaaaaaay down.
 }
 
 // 3 rings, woo
-int testFourCounters[] = {0, 0, 0, 0, 0, 0, 0, 0};
-void TestPatternFour()
+int whitespinCounters[] = {0, 0, 0, 0, 0, 0, 0, 0};
+void ip_white_spinner()
 {
   // Serial.printf("Spiral %d led %d\n", spiralCounter, fullSpiral[spiralCounter]);
-  leds[allRings[5][testFourCounters[0]++]] = CHSV(0, 0, IDLEBRIGHTNESS);
-  leds[allRings[4][testFourCounters[1]++]] = CHSV(85, 0, IDLEBRIGHTNESS);
-  leds[allRings[3][testFourCounters[2]++]] = CHSV(170, 0, IDLEBRIGHTNESS);
+  leds[allRings[5][whitespinCounters[0]++]] = CHSV(0, 0, IDLEBRIGHTNESS);
+  leds[allRings[4][whitespinCounters[1]++]] = CHSV(85, 0, IDLEBRIGHTNESS);
+  leds[allRings[3][whitespinCounters[2]++]] = CHSV(170, 0, IDLEBRIGHTNESS);
 
-  testFourCounters[0] %= 30;
-  testFourCounters[1] %= 24;
-  testFourCounters[2] %= 18;
+  whitespinCounters[0] %= 30;
+  whitespinCounters[1] %= 24;
+  whitespinCounters[2] %= 18;
 }
 
 // I did this on accident once so let's roll with it, eh?
-void TestPatternFive()
+void ip_chase_rgb()
 {
   decayFactor = DECAY / 4;
 
   for(int i = 0; i < 3; i++){
-    if (testThreeCounters[i] == 114) testThreeCounters[i] = 115; // we skipped one in the wiring, so skip it here, too.
+    if (rgbSpiralCounters[i] == 114) rgbSpiralCounters[i] = 115; // we skipped one in the wiring, so skip it here, too.
   }
 
-  leds[testThreeCounters[0]++] = CHSV(0, 255, IDLEBRIGHTNESS);
-  leds[testThreeCounters[1]++] = CHSV(85, 255, IDLEBRIGHTNESS);
-  leds[testThreeCounters[2]++] = CHSV(170, 255, IDLEBRIGHTNESS);
-  testThreeCounters[0] %= (NUM_LEDS);
-  testThreeCounters[1] %= (NUM_LEDS);
-  testThreeCounters[2] %= (NUM_LEDS);
+  leds[rgbSpiralCounters[0]++] = CHSV(0, 255, IDLEBRIGHTNESS);
+  leds[rgbSpiralCounters[1]++] = CHSV(85, 255, IDLEBRIGHTNESS);
+  leds[rgbSpiralCounters[2]++] = CHSV(170, 255, IDLEBRIGHTNESS);
+  rgbSpiralCounters[0] %= (NUM_LEDS);
+  rgbSpiralCounters[1] %= (NUM_LEDS);
+  rgbSpiralCounters[2] %= (NUM_LEDS);
 }
 #pragma endregion
 

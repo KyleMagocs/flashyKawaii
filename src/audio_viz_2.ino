@@ -22,30 +22,35 @@ typedef void (*PatternFunction)(float levels[]);
 PatternFunction allPatterns[] = {
     // patternOne,
     // patternTwo,
-    patternThree,
-    patternFour,
-    patternFive,
-    patternSix,
-    patternSeven,
-    patternEight,
-    patternNine,
-    patternTen};
+    p_ringBands,
+    p_ringBands_inverted,
+    p_hexBands,
+    // patternFive,
+    p_spiralIn,
+    p_vuMeter,
+    p_vuMeter_inverted,
+    p_spinTheWheel,
+    p_fadeWheel};
 int NUMPATTERNS = sizeof(allPatterns) / sizeof(PatternFunction);
 
 typedef void (*IdleFunction)();
 IdleFunction idlePatterns[] = {
-    // IdlePatternOne_better,  // started crashing and I don't like it enough to care
-    IdlePatternTwo,
-    IdlePatternThree,
-    IdlePatternFour_fullsend,
-    // IdlePatternFive,
-    pacifica_loop,
+    // ip_spiralout_spiralin,  // started crashing and I don't like it enough to care
+    ip_spiralout,
+    ip_rainbowrings,
+    ip_rainbowhexes,
+    ip_outline,
+    ip_spinner_rainbow,
+    // ip_spiralout_rainbow,
+    ip_spiral_rgb,
+    ip_spiral_matrix,
+    ip_white_spinner,
+    ip_chase_rgb,
+
+    // below were cribbed from FastLED examples
     FireNormal,
     FireCool,
-    TestPatternFour,
-    TestPatternThree,
-    TestPatternThree_Matrix,
-    TestPatternFive
+    pacifica_loop
     };
 int NUMIDLEPATTERNS = sizeof(idlePatterns) / sizeof(IdleFunction);
 
@@ -134,7 +139,7 @@ void loop()
       {
         idleTimer = 0;
       }
-      if (idleTimer / 1000 > 30)
+      if (idleTimer / 1000 > IDLE_TIMEOUT)
       {
         FastLED.setBrightness(IDLEBRIGHTNESS);
         patternSwitch = patternSwitch - 10; // slow down a bit if we're in idle mode

@@ -7,18 +7,17 @@
 #include "Palette.h"
 #include "AudioControl.h"
 #include "constants.h"
-#define USE_WS2812SERIAL // the teensy 4 haaaaates you if you don't do this
-#define FASTLED_INTERNAL
 
-#define DECAYSPEED 1
+
+#define USE_WS2812SERIAL // the teensy 4 haaaaates you if you don't do this.  If you're reading this and using a teensy 3, probably remove it??
+#define FASTLED_INTERNAL
 #define DATA_PIN 14
-#define NUM_LEDS 150 // only actually 133, sorta 134, but FastLED is pulling some shenanigans, so.
-CRGBArray<150> leds;
 #define LED_TYPE WS2812SERIAL
 #define COLOR_ORDER BGR
-#define BRIGHTNESS 200
 
-int decayFactor = DECAY / 2;
+CRGBArray<NUM_LEDS_FULL> leds;
+
+int decayFactor = DECAY;
 // int levelMax[] = { 0, 0, 0, 0, 0, 0, 0, 0 };
 int idleStartHues[8] = {0, 30, 60, 90, 120, 150, 180, 210};
 int hueOffset = 0;
@@ -26,7 +25,7 @@ int hueOffset = 0;
 #pragma region UTILS
 void init_leds()
 {
-  FastLED.addLeds<LED_TYPE, DATA_PIN, COLOR_ORDER>(leds, 150);
+  FastLED.addLeds<LED_TYPE, DATA_PIN, COLOR_ORDER>(leds, NUM_LEDS_FULL);
   // FastLED.addLeds<LED_TYPE, DATA_PIN, COLOR_ORDER>(secret_leds, 150);
 }
 
@@ -42,8 +41,6 @@ void increaseWheel(int amount)
   wheelIndex = (wheelIndex + amount) % 255;
 }
 
-#define BASS_THRESHOLD 15
-#define BASS_TIMEOUT 4
 elapsedMillis bassTimer = 0;
 elapsedMillis bpmTimer = 0;
 float lastHit = 0;
@@ -54,7 +51,7 @@ bool bassHit(float levels[])
   // return getLowBeat();
   // basscounter++;
 
-  bool bassReady =  float(bassTimer) > float( 60 / estBpm * 1000); // 60s / 200bpm * millis)
+  bool bassReady =  float(bassTimer) > float( 60 / estBpm * 1000); // 60s / x bpm * millis)
   int lowend = int((levels[0] + levels[1])/2);
   bool thresholdHit = lowend > BASS_THRESHOLD; 
 
@@ -98,7 +95,7 @@ bool bassHit(float levels[])
 
 void fadeAllLeds()
 {
-  for (int i = 0; i < NUM_LEDS; i++)
+  for (int i = 0; i < NUM_LEDS_FULL; i++)
   {
     leds[i].fadeToBlackBy(decayFactor);
   }
@@ -169,7 +166,7 @@ void killTheExtras(){
 #pragma region REALPATTERNS
 
 // spiral each hex out
-void patternOne(float levels[])
+void p_spiralout(float levels[])
 {
   for (int i = 0; i < 7; i++)
   {
@@ -185,50 +182,61 @@ void patternOne(float levels[])
 }
 
 // spiral each hex out, but rainbow!
-void patternTwo(float levels[])
+void p_spiralout_rainbow(float levels[])
 {
   increaseHue(2);
-  patternOne(levels);
+  p_spiralout(levels);
 }
 
 // this one does the dope rings for each band, and is the best one
-void patternThree(float levels[])
+void p_ringBands(float levels[])
 {
-  //  changeHueOnBass(levels);
-
   for (int i = 0; i < 8; i++)
   {
     int hue = (i * (255 / 8) + hueOffset);
     int band_value = int(levels[i]);
 
-    if (band_value > 8)  // this is arbitrary but it feels good.
+    if (band_value > 9)  // this is arbitrary but it feels good.
     {
       int x = i;
-      if (i == 4)
-      {
-        x = 6;
-      } // I did this by mistake early on and it turns out it makes it way better
-      else if (i == 6)
-      {
-        x = 4;
-      }
-      else if (i == 2)
-      {
-        x = 0;
-      }
-      else if (i == 0)
-      {
-        x = 2;
-      }
+      if (i == 4) x = 6; // I did this by mistake early on and it turns out it makes it way better
+      if (i == 6) x = 4;
+      if (i == 2) x = 0;
+      if (i == 0) x = 2;
+      setRingColor(leds, x, CHSV(hue, 255, BRIGHTNESS));
+    }
+  }
+}
+
+// it's pattern three.  but with the rings sorta inverted.  Not actually inverted.  Winging it here.  Cut me some slack.
+void p_ringBands_inverted(float levels[])
+{
+  for (int i = 0; i < 8; i++)
+  {
+    int hue = (i * (255 / 8) + hueOffset);
+    int band_value = int(levels[i]);
+
+    if (band_value > 9)  // this is arbitrary but it feels good.
+    {
+      int x = i;
+      
+      if (i == 0) x = 5;
+      if (i == 1) x = 4;
+      if (i == 2) x = 3;
+      if (i == 3) x = 2;
+      if (i == 4) x = 1;
+      if (i == 5) x = 6;
+      if (i == 6) x = 7;
+      if (i == 7) x = 0;
+
       setRingColor(leds, x, CHSV(hue, 255, BRIGHTNESS));
     }
   }
 }
 
 // each hex is a band, and lights their rings outward like three
-void patternFour(float levels[])
+void p_hexBands(float levels[])
 {
-
   for (int i = 0; i < 7; i++)
   {
     int hue = (i * (255 / 8) + hueOffset);
@@ -237,17 +245,18 @@ void patternFour(float levels[])
     if (band_value > 2)
       for (int j = 0; j < INNERLEN; j++)
         leds[hexes[6 - i].center[j]] = CHSV(hue, 255, BRIGHTNESS);
-    if (band_value > 5)
+    if (band_value > 6)
       for (int j = 0; j < MIDDLELEN; j++)
         leds[hexes[6 - i].middle[j]] = CHSV(hue + 20, 255, BRIGHTNESS);
-    if (band_value > 10)
+    if (band_value > 12)
       for (int j = 0; j < OUTERLEN; j++)
         leds[hexes[6 - i].outer[j]] = CHSV(hue + 40, 255, BRIGHTNESS);
   }
 }
 
 // each hex BUMPS
-void patternFive(float levels[])
+// I think this sucks and is actually just a dupe of four.  I forget what I was going for.
+void p_butts_sucks_dont_use_me(float levels[])
 {
   bassHit(levels);
 
@@ -259,10 +268,10 @@ void patternFive(float levels[])
     if (band_value > 2)
       for (int j = 0; j < INNERLEN; j++)
         leds[hexes[6 - i].center[j]] = CHSV(hue, 255, BRIGHTNESS);
-    if (band_value > 5)
+    if (band_value > 6)
       for (int j = 0; j < MIDDLELEN; j++)
         leds[hexes[6 - i].middle[j]] = CHSV(hue, 255, BRIGHTNESS);
-    if (band_value > 10)
+    if (band_value > 12)
       for (int j = 0; j < OUTERLEN; j++)
         leds[hexes[6 - i].outer[j]] = CHSV(hue, 255, BRIGHTNESS);
   }
@@ -274,7 +283,7 @@ void patternFive(float levels[])
 }
 
 // each hex is a band, and spirals inward
-void patternSix(float levels[])
+void p_spiralIn(float levels[])
 {
   for (int i = 0; i < 7; i++)
   {
@@ -292,9 +301,9 @@ void patternSix(float levels[])
 // each hex is a band, and lights their rows outward
 // but the center hex does its own thing
 // kind of a combo of three and four
-void patternSeven(float levels[])
+void p_vuMeter(float levels[])
 {
-
+  decayFactor = DECAY/1.5;
   for (int i = 0; i < 6; i++)
   { // skip the center hex for now
     int band_value = int(levels[i]);
@@ -302,36 +311,38 @@ void patternSeven(float levels[])
     if (band_value > 3)
       for (int j = 0; j < 3; j++)
         leds[hexes[i].ring4[j]] = CHSV(hueOffset + 85, 255, BRIGHTNESS);
-    if (band_value > 4)
+    if (band_value > 5)
       for (int j = 0; j < 4; j++)
         leds[hexes[i].ring5[j]] = CHSV(hueOffset + 85, 255, BRIGHTNESS);
-    if (band_value > 7)
+    if (band_value > 8)
       for (int j = 0; j < 5; j++)
         leds[hexes[i].ring6[j]] = CHSV(hueOffset + 48, 255, BRIGHTNESS);
-    if (band_value > 10)
+    if (band_value > 11)
       for (int j = 0; j < 4; j++)
         leds[hexes[i].ring7[j]] = CHSV(hueOffset + 48, 255, BRIGHTNESS);
-    if (band_value > 12)
+    if (band_value > 14)
       for (int j = 0; j < 3; j++)
         leds[hexes[i].ring8[j]] = CHSV(hueOffset + 0, 255, BRIGHTNESS);
   }
   // center hex
   int band_value = int(levels[0]);
-  if (band_value > 2)
+  if (band_value > 3)
     for (int j = 0; j < INNERLEN; j++)
       leds[hexes[6].center[j]] = CHSV(hueOffset + 85, 255, BRIGHTNESS);
-  if (band_value > 7)
+
+  if (band_value > 8)
     for (int j = 0; j < MIDDLELEN; j++)
       leds[hexes[6].middle[j]] = CHSV(hueOffset + 85, 255, BRIGHTNESS);
-  if (band_value > 12)
+
+  if (band_value > 13)
     for (int j = 0; j < OUTERLEN; j++)
       leds[hexes[6].outer[j]] = CHSV(hueOffset + 85, 255, BRIGHTNESS);
 }
 
 //inverted seven
-void patternEight(float levels[])
+void p_vuMeter_inverted(float levels[])
 {
-
+  decayFactor = DECAY/1.5;
   for (int i = 0; i < 6; i++)
   { // skip the center hex for now
     int band_value = int(levels[i]);
@@ -339,34 +350,34 @@ void patternEight(float levels[])
     if (band_value > 3)
       for (int j = 0; j < 3; j++)
         leds[hexes[i].ring8[j]] = CHSV(hueOffset + 85, 255, BRIGHTNESS);
-    if (band_value > 4)
+    if (band_value > 5)
       for (int j = 0; j < 4; j++)
         leds[hexes[i].ring7[j]] = CHSV(hueOffset + 85, 255, BRIGHTNESS);
-    if (band_value > 7)
+    if (band_value > 8)
       for (int j = 0; j < 5; j++)
         leds[hexes[i].ring6[j]] = CHSV(hueOffset + 48, 255, BRIGHTNESS);
-    if (band_value > 10)
+    if (band_value > 11)
       for (int j = 0; j < 4; j++)
         leds[hexes[i].ring5[j]] = CHSV(hueOffset + 48, 255, BRIGHTNESS);
-    if (band_value > 12)
+    if (band_value > 14)
       for (int j = 0; j < 3; j++)
         leds[hexes[i].ring4[j]] = CHSV(hueOffset + 0, 255, BRIGHTNESS);
   }
   // center hex
   int band_value = int(levels[0]);
-  if (band_value > 2)
+  if (band_value > 3)
     for (int j = 0; j < INNERLEN; j++)
       leds[hexes[6].center[j]] = CHSV(85, 0, BRIGHTNESS);
-  if (band_value > 7)
+  if (band_value > 8)
     for (int j = 0; j < MIDDLELEN; j++)
       leds[hexes[6].middle[j]] = CHSV(85, 0, BRIGHTNESS);
-  if (band_value > 12)
+  if (band_value > 13)
     for (int j = 0; j < OUTERLEN; j++)
       leds[hexes[6].outer[j]] = CHSV(85, 0, BRIGHTNESS);
 }
 
 // okay just hear me out on this one
-void patternNine(float levels[])
+void p_spinTheWheel(float levels[])
 {
 
   int band_value = int(levels[0]);
@@ -376,7 +387,7 @@ void patternNine(float levels[])
   if (band_value > 7)
     for (int j = 0; j < MIDDLELEN; j++)
       leds[hexes[6].middle[j]] = CHSV(85, 0, BRIGHTNESS);
-  if (band_value > 12)
+  if (band_value > BASS_THRESHOLD)
     for (int j = 0; j < OUTERLEN; j++)
       leds[hexes[6].outer[j]] = CHSV(85, 0, BRIGHTNESS);
 
@@ -398,7 +409,7 @@ void patternNine(float levels[])
 }
 
 // it's like nine but a bit more bass-important?
-void patternTen(float levels[])
+void p_fadeWheel(float levels[])
 {
   decayFactor = DECAY / 2;
   int band_value = int(levels[0]);
@@ -408,7 +419,7 @@ void patternTen(float levels[])
   if (band_value > 7)
     for (int j = 0; j < MIDDLELEN; j++)
       leds[hexes[6].middle[j]] = CHSV(85, 0, BRIGHTNESS);
-  if (band_value > 12)
+  if (band_value > BASS_THRESHOLD)
     for (int j = 0; j < OUTERLEN; j++)
       leds[hexes[6].outer[j]] = CHSV(85, 0, BRIGHTNESS);
 

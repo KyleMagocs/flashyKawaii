@@ -2,13 +2,13 @@
 #ifndef Hex_h
 #define Hex_h
 
+#include "constants.h"
+
 // hex definitions
 #define INNERLEN 1
 #define MIDDLELEN 6
 #define OUTERLEN 12
 #define NUMHEXES 7
-
-#define NUM_LEDS 150
 
 class Hex
 {
