@@ -148,7 +148,6 @@ void loop()
       else
       {
         FastLED.setBrightness(BRIGHTNESS );
-        // patternTen(levels);
         allPatterns[patternIndex](levels);
       }
       FastLED.show();
