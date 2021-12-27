@@ -29,6 +29,7 @@ PatternFunction allPatterns[] = {
     p_spiralIn,
     p_vuMeter,
     p_vuMeter_inverted,
+    p_vuMeter_rotated,
     p_spinTheWheel
     // p_fadeWheel
     };
@@ -147,7 +148,8 @@ void loop()
       else
       {
         FastLED.setBrightness(BRIGHTNESS );
-        allPatterns[patternIndex](levels);
+        p_vuMeter_rotated(levels);
+        // allPatterns[patternIndex](levels);
       }
       FastLED.show();
     }
