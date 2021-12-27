@@ -29,14 +29,15 @@ PatternFunction allPatterns[] = {
     p_spiralIn,
     p_vuMeter,
     p_vuMeter_inverted,
-    p_spinTheWheel,
-    p_fadeWheel};
+    p_spinTheWheel
+    // p_fadeWheel
+    };
 int NUMPATTERNS = sizeof(allPatterns) / sizeof(PatternFunction);
 
 typedef void (*IdleFunction)();
 IdleFunction idlePatterns[] = {
     // ip_spiralout_spiralin,  // started crashing and I don't like it enough to care
-    ip_spiralout,
+    // ip_spiralout,
     ip_rainbowrings,
     ip_rainbowhexes,
     ip_outline,
@@ -95,19 +96,16 @@ void setup()
   Serial.printf("idle:%d ", idleIndex);
 
   init_leds();
-  startupTest();
-
   init_audio();
   init_hexes();
+  startupTest();
+
 }
 
 elapsedMillis drawTimer;
 elapsedMillis idleTimer = 30000; // just so it starts up in idle mode
 elapsedMillis patternSwitch;
 
-// todo: move to patterns.h
-
-PatternFunction curPattern;
 
 void loop()
 {
@@ -118,7 +116,7 @@ void loop()
     {
       drawTimer = 0;
       fadeAllLeds();
-      killTheExtras(); // have yet to figure out why I gotta do this.
+      
       float levels[8];
       LoadLevels1024(levels);
       bassHit(levels);
@@ -129,6 +127,7 @@ void loop()
         Serial.printf("pattern:%d ", patternIndex);
         Serial.printf("idle:%d ", idleIndex);
         patternSwitch = 0;
+        killTheExtras(); // have yet to figure out why I gotta do this.
         increaseHue(random(128)); // randomize our manual palette
         randomizePalette();  // randomize the index of our pre-def palettes
         decayFactor = DECAY; // reset it, let patterns choose to change it.
