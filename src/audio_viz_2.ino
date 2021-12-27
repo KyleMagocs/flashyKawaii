@@ -148,8 +148,8 @@ void loop()
       else
       {
         FastLED.setBrightness(BRIGHTNESS );
-        p_vuMeter_rotated(levels);
-        // allPatterns[patternIndex](levels);
+        // p_vuMeter_rotated(levels);
+        allPatterns[patternIndex](levels);
       }
       FastLED.show();
     }
