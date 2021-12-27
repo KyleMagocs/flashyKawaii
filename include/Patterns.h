@@ -17,6 +17,7 @@
 
 CRGBArray<NUM_LEDS_FULL> leds;
 
+
 int decayFactor = DECAY;
 // int levelMax[] = { 0, 0, 0, 0, 0, 0, 0, 0 };
 int idleStartHues[8] = {0, 30, 60, 90, 120, 150, 180, 210};
@@ -157,7 +158,6 @@ void startupTest()
 // fastLED does something to light up lights past the 133 so like, let's just force those off, I guess!
 void killTheExtras(){
   for(int i = 134; i < 150; i++){
-    Serial.printf("Clearing led: %d ", i);
     leds[i] = CHSV(0,0,0);
   }
 }
@@ -239,6 +239,9 @@ void p_ringBands_inverted(float levels[])
 // each hex is a band, and lights their rings outward like three
 void p_hexBands(float levels[])
 {
+  
+  decayFactor = DECAY/2;
+
   for (int i = 0; i < 7; i++)
   {
     int hue = (i * (255 / 8) + hueOffset);
