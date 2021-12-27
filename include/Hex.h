@@ -29,6 +29,11 @@ public:
   int *ring8;
   int *rings[8];
   int spiral[19];
+  int *sidering1;
+  int *sidering2;
+  int *sidering3;
+  int *sidering4;
+  int *sidering5;
 };
 Hex::Hex() {}
 
@@ -124,6 +129,12 @@ Hex::Hex(int index)
   rings[5] = ring6;
   rings[6] = ring7;
   rings[7] = ring8;
+
+  sidering1 = new int[3]{1 + mod, 0 + mod, 5 + mod};
+  sidering2 = new int[4]{2 + mod, 3 + mod, 4 + mod, 6 + mod};
+  sidering3 = new int[5]{11 + mod, 10 + mod, 9 + mod, 8 + mod, 7 + mod};
+  sidering4 = new int[4]{12 + mod, 14 + mod, 15 + mod, 18 + mod};
+  sidering5 = new int[3]{13 + mod, 16 + mod, 17 + mod};
   // ring4, ring5, ring6, ring7, ring8};
   //  Serial.print("len of ring1: ");
   //  Serial.println(sizeof(ring1) / sizeof(int));

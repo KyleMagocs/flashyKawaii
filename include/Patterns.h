@@ -381,6 +381,47 @@ void p_vuMeter_inverted(float levels[])
       leds[hexes[6].outer[j]] = CHSV(85, 0, BRIGHTNESS);
 }
 
+// each hex is a band, and lights their rows outward
+// but the center hex does its own thing
+// kind of a combo of three and four
+void p_vuMeter_rotated(float levels[])
+{
+  decayFactor = DECAY/1.5;
+  for (int i = 0; i < 6; i++)
+  { // skip the center hex for now
+    int band_value = int(levels[i]);
+
+    if (band_value > 3)
+      for (int j = 0; j < 3; j++)
+        leds[hexes[i].sidering1[j]] = CHSV(hueOffset + 85, 255, BRIGHTNESS);
+    if (band_value > 5)
+      for (int j = 0; j < 4; j++)
+        leds[hexes[i].sidering2[j]] = CHSV(hueOffset + 85, 255, BRIGHTNESS);
+    if (band_value > 8)
+      for (int j = 0; j < 5; j++)
+        leds[hexes[i].sidering3[j]] = CHSV(hueOffset + 48, 255, BRIGHTNESS);
+    if (band_value > 11)
+      for (int j = 0; j < 4; j++)
+        leds[hexes[i].sidering4[j]] = CHSV(hueOffset + 48, 255, BRIGHTNESS);
+    if (band_value > 14)
+      for (int j = 0; j < 3; j++)
+        leds[hexes[i].sidering5[j]] = CHSV(hueOffset + 0, 255, BRIGHTNESS);
+  }
+  // center hex
+  int band_value = int(levels[0]);
+  if (band_value > 3)
+    for (int j = 0; j < INNERLEN; j++)
+      leds[hexes[6].center[j]] = CHSV(hueOffset + 85, 255, BRIGHTNESS);
+
+  if (band_value > 8)
+    for (int j = 0; j < MIDDLELEN; j++)
+      leds[hexes[6].middle[j]] = CHSV(hueOffset + 48, 255, BRIGHTNESS);
+
+  if (band_value > 13)
+    for (int j = 0; j < OUTERLEN; j++)
+      leds[hexes[6].outer[j]] = CHSV(hueOffset + 0, 255, BRIGHTNESS);
+}
+
 // okay just hear me out on this one
 void p_spinTheWheel(float levels[])
 {
