@@ -142,7 +142,7 @@ void ip_spiralout_rainbow()
 int rgbSpiralCounters[] = {0, 44, 88};
 void ip_spiral_rgb()
 {
-  decayFactor = DECAY / 4;
+  decayFactor = DECAY / 5;
 
   for(int i = 0; i < 3; i++){
     if (rgbSpiralCounters[i] == 19) rgbSpiralCounters[i]++;
@@ -187,7 +187,7 @@ void ip_white_spinner()
 // I did this on accident once so let's roll with it, eh?
 void ip_chase_rgb()
 {
-  decayFactor = DECAY / 4;
+  decayFactor = DECAY / 5;
 
   for(int i = 0; i < 3; i++){
     if (rgbSpiralCounters[i] == 114) rgbSpiralCounters[i] = 115; // we skipped one in the wiring, so skip it here, too.
