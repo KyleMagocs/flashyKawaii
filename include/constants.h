@@ -7,7 +7,7 @@
 #define MAGIC_NUMBER 2400  // used to calculate decay factor
 #define DECAY MAGIC_NUMBER/FPS
 
-#define BASS_THRESHOLD 15
+#define BASS_THRESHOLD 13
 #define BASS_TIMEOUT 4
 
 #define BRIGHTNESS 200

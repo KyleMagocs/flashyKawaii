@@ -228,13 +228,14 @@ void init_hexes()
 {
   // Serial.println("Initializing hexes now");
   // bespoke ordering, why not.
-  hexes[6] = Hex(6);
-  hexes[5] = Hex(0);
-  hexes[4] = Hex(3);
-  hexes[3] = Hex(1);
-  hexes[2] = Hex(4);
-  hexes[1] = Hex(2);
   hexes[0] = Hex(5);
+  hexes[1] = Hex(2);
+  hexes[2] = Hex(4);
+  hexes[3] = Hex(1);
+  hexes[4] = Hex(3);
+  hexes[5] = Hex(0);
+  hexes[6] = Hex(6);
+  
   for(int i = 0; i < NUMHEXES; i++){
     orderedHexes[i] = Hex(i);
   }

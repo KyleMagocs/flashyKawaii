@@ -62,24 +62,26 @@ int idleIndex;
 void printBands()
 {
   int bands = 8;
-  int bins = 256;
+  int bins = 128;
+  Serial.println("For 256:");
   for (int b = 0; b < bands; b++)
   {
     int from = int(exp(log(bins) * b / bands));
     int to = int(exp(log(bins) * (b + 1) / bands));
     if (from == 0)
-      Serial.printf("%1d %1d\n", from, to - 2); // maual tweaking off the beaten path woo
+      Serial.printf("%1d %1d\n", from, to); // maual tweaking off the beaten path woo
     else
-      Serial.printf("%1d %1d\n", from - 1, to - 2);
+      Serial.printf("%1d %1d\n", from, to);
     // Serial.printf("To   = %1d\n", to-1);
   }
-  Serial.println("OR!!!");
-  bins = 1024;
+  Serial.println("-----------");
+  Serial.println("For 1024:");
+  bins = 512;
   for (int b = 0; b < bands; b++)
   {
     int from = int(exp(log(bins) * b / bands));
     int to = int(exp(log(bins) * (b + 1) / bands));
-    Serial.printf("%1d, %1d\n", from-1, to); // maual tweaking off the beaten path woo
+    Serial.printf("%1d, %1d\n", from, to); // maual tweaking off the beaten path woo
     
     // Serial.printf("To   = %1d\n", to-1);
   }
@@ -89,7 +91,7 @@ void setup()
 {
   delay(1000);
   Serial.begin(9600);
-  // printBands();
+  printBands();
   randomSeed(analogRead(0));
   patternIndex = random(NUMPATTERNS);
   idleIndex = random(NUMIDLEPATTERNS);
@@ -113,7 +115,7 @@ void loop()
   if (drawTimer > 1000 / FPS)
   {
     // beatDetectionLoop();  // I'm pretty sure all this really does is slow everything down, so let's not.
-    if (fft256_1.available())
+    if (fft1024_1.available())
     {
       drawTimer = 0;
       fadeAllLeds();
@@ -148,7 +150,7 @@ void loop()
       else
       {
         FastLED.setBrightness(BRIGHTNESS );
-        // p_vuMeter_rotated(levels);
+        // p_spinTheWheel(levels);
         allPatterns[patternIndex](levels);
       }
       FastLED.show();

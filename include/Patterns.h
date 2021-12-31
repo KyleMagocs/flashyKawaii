@@ -79,7 +79,7 @@ bool bassHit(float levels[])
   
   // Serial.println("");
 
-  return thresholdHit && bassReady;
+  return thresholdHit;
   // if ((levels[0] + levels[1] / 2) > BASS_THRESHOLD)
   // {
   //   // Serial.printf("Bass Counter: %d\n", huechangecounter);
@@ -209,6 +209,23 @@ void p_ringBands(float levels[])
   }
 }
 
+// ring bands but without tweaks so I can debug
+void p_ringBands_naive(float levels[])
+{
+  decayFactor = DECAY/2;
+  for (int i = 0; i < 8; i++)
+  {
+    int hue = (i * (255 / 8) + hueOffset);
+    int band_value = int(levels[i]);
+
+    if (band_value > 9)  // this is arbitrary but it feels good.
+    {
+      int x = i;
+      setRingColor(leds, x, CHSV(hue, 255, BRIGHTNESS));
+    }
+  }
+}
+
 // it's pattern three.  but with the rings sorta inverted.  Not actually inverted.  Winging it here.  Cut me some slack.
 void p_ringBands_inverted(float levels[])
 {
@@ -290,6 +307,7 @@ void p_butts_sucks_dont_use_me(float levels[])
 // each hex is a band, and spirals inward
 void p_spiralIn(float levels[])
 {
+  decayFactor = DECAY/1.5;
   for (int i = 0; i < 7; i++)
   {
     int hue = (i * 20 + hueOffset);
@@ -433,25 +451,37 @@ void p_spinTheWheel(float levels[])
   if (band_value > 7)
     for (int j = 0; j < MIDDLELEN; j++)
       leds[hexes[6].middle[j]] = CHSV(85, 0, BRIGHTNESS);
-  if (band_value > BASS_THRESHOLD)
-    for (int j = 0; j < OUTERLEN; j++)
+  if (band_value > BASS_THRESHOLD){
+    for (int j = 0; j < OUTERLEN; j++){
+      leds[hexes[6].center[0]] = CHSV(0, 255, BRIGHTNESS);
       leds[hexes[6].outer[j]] = CHSV(85, 0, BRIGHTNESS);
-
-  if (bassHit(levels))
-  {
-    for (int i = 0; i < 12; i++)
+    }
+    for (int i = 0; i < 10; i++)
     {
-      increaseWheel(1);
+      leds[hexes[6].center[0]] = CHSV(0, 255, BRIGHTNESS);
+      increaseWheel(3);
       drawWheelWithPalette(BRIGHTNESS, getCurrentPalette());
       FastLED.show();
-      delay(.1);
+      delay(.05);
     }
   }
-  else
-  {
+
+  // if (bassHit(levels))
+  // {
+  //   for (int i = 0; i < 12; i++)
+  //   {
+  //     leds[hexes[6].center[0]] = CHSV(0, 255, BRIGHTNESS);
+  //     increaseWheel(3);
+  //     drawWheelWithPalette(BRIGHTNESS, getCurrentPalette());
+  //     FastLED.show();
+  //     delay(.1);
+  //   }
+  // }
+  // else
+  // {
     increaseWheel(.5);
     drawWheelWithPalette(BRIGHTNESS, getCurrentPalette());
-  }
+  // }
 }
 
 // it's like nine but a bit more bass-important?
